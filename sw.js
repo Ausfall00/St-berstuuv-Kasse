@@ -1,5 +1,5 @@
 // Offline-Modus: erst Netz (damit Updates ankommen), sonst Zwischenspeicher.
-const V = 'vereinskasse-v2';
+const V = 'vereinskasse-v3';
 const FILES = [
   './', './index.html', './manifest.webmanifest',
   './abril-fatface.woff2', './kaushan-script.woff2',
@@ -28,6 +28,6 @@ self.addEventListener('fetch', e => {
         if (res.ok) { const copy = res.clone(); caches.open(V).then(c => c.put(req, copy)); }
         return res;
       })
-      .catch(() => caches.match(req).then(m => m || caches.match('./index.html')))
+      .catch(() => caches.match(req).then(m => m || (req.mode === 'navigate' ? caches.match('./index.html') : Response.error())))
   );
 });

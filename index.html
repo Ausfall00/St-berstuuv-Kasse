@@ -26,13 +26,15 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid 
 button:disabled{cursor:default}
 
 /* Kopf mit Logo-Anmutung */
-.top{display:flex;align-items:center;gap:10px;padding:max(8px,env(safe-area-inset-top)) 14px 8px;background:var(--card);border-bottom:4px solid var(--or);position:sticky;top:0;z-index:5}
-.mark{height:56px;width:auto;display:block}
+.top{display:flex;align-items:center;gap:8px;padding:max(8px,env(safe-area-inset-top)) 14px 8px;background:var(--card);border-bottom:4px solid var(--or);position:sticky;top:0;z-index:5}
+.mark{height:52px;width:auto;display:block}
 .brand{display:flex;flex-direction:column;line-height:1;margin-right:auto}
-.b1{font:400 1.6rem "Abril Fatface",Georgia,serif;letter-spacing:.02em}
+.b1{font:400 1.45rem "Abril Fatface",Georgia,serif;letter-spacing:.02em}
 .b2{font:400 1rem "Kaushan Script",cursive;color:var(--copper);margin:3px 0 0 1.3em}
-.menu{min-height:44px;padding:0 16px;border:2px solid var(--ink);border-radius:999px;background:none;font-weight:700}
+.menu{min-height:44px;padding:0 12px;border:2px solid var(--ink);border-radius:999px;background:none;font-weight:700;white-space:nowrap}
+.help{width:44px;height:44px;border:2px solid var(--ink);border-radius:50%;background:none;font-weight:800;font-size:1.2rem;flex:none}
 body[data-view=admin] .menu{background:var(--ink);color:var(--card)}
+@media(max-width:380px){.b2{display:none}}
 
 main{max-width:1040px;margin:0 auto;padding:14px 14px 110px}
 @media(min-width:760px){main{padding-bottom:30px}}
@@ -41,7 +43,8 @@ main{max-width:1040px;margin:0 auto;padding:14px 14px 110px}
 .cats,.seg{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 12px;scrollbar-width:none}
 .cats::-webkit-scrollbar,.seg::-webkit-scrollbar{display:none}
 .ctab,.seg button{flex:1 0 auto;min-height:50px;padding:0 14px;border:2px solid var(--ink);border-radius:999px;background:var(--card);font-weight:700;white-space:nowrap}
-.seg button{min-height:44px}
+.seg{gap:6px}
+.seg button{flex:1 1 auto;min-height:44px;padding:0 8px;font-size:.9rem}
 .ctab[aria-selected=true],.seg button[aria-selected=true]{background:var(--ink);color:var(--card)}
 .ctab i{font-style:normal;background:var(--or);color:var(--or-ink);border-radius:999px;padding:1px 8px;margin-left:8px;font-size:.85rem}
 
@@ -107,21 +110,34 @@ input[type=text],select{width:100%;min-height:44px;padding:8px 10px;border:1px s
   @keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
 }
 
-/* Hinweise, Dialog */
+/* Hinweise, Dialoge */
 #banner:empty{display:none}
 #banner{max-width:1040px;margin:10px auto 0;padding:0 14px}
 #banner div{background:var(--glow);border:1px solid var(--or);border-radius:12px;padding:10px 12px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-#toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:var(--ink);color:var(--card);padding:12px 18px;border-radius:12px;font-weight:600;z-index:60;max-width:90vw;text-align:center;display:none;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+#toast{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);background:var(--ink);color:var(--card);padding:12px 18px;border-radius:12px;font-weight:600;z-index:80;max-width:90vw;text-align:center;display:none;box-shadow:0 6px 20px rgba(0,0,0,.3)}
 #toast.show{display:block}
 @media(min-width:760px){#toast{bottom:30px}}
 #modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;z-index:70;padding:16px}
 #modal.show{display:flex}
-.dlg{background:var(--card);border-radius:18px;padding:20px;max-width:440px;width:100%;border-top:6px solid var(--copper)}
+.dlg{background:var(--card);border-radius:18px;padding:20px;max-width:440px;width:100%;max-height:92vh;overflow:auto;border-top:6px solid var(--copper)}
 .dlg h2{font:400 1.4rem "Abril Fatface",Georgia,serif;margin:0 0 8px}
 .dlg p{margin:8px 0}
+.dlg ol{padding-left:1.3em;margin:8px 0}
+.dlg li{margin:6px 0}
 .dlg .btns{display:flex;gap:10px;margin-top:16px}
 .dlg .btns button{flex:1;min-height:52px}
-.staffok{border:0;background:var(--copper);color:var(--card);border-radius:10px;font-weight:700;padding:10px 14px}
+.staffok,.okbtn,.warnok{border:0;border-radius:10px;font-weight:700;padding:10px 14px}
+.staffok{background:var(--copper);color:var(--card)}
+.okbtn{background:var(--or);color:var(--or-ink)}
+.warnok{background:var(--warn);color:var(--card)}
+.dlg.pin{border-top-color:var(--or);text-align:center}
+.dots{display:flex;gap:16px;justify-content:center;margin:14px 0 4px}
+.dots i{width:20px;height:20px;border-radius:50%;border:2px solid var(--ink)}
+.dots i.on{background:var(--ink)}
+.perr{color:var(--warn);min-height:1.5em;margin:4px 0 8px;font-weight:600}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.pad button{min-height:62px;border:1px solid var(--line);border-radius:14px;background:var(--bg);font-size:1.5rem;font-weight:700}
+.pad button.ghost{font-size:1rem;font-weight:600}
 
 /* Verwaltung */
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
@@ -148,8 +164,6 @@ th:first-child,td:first-child{text-align:left}
 .acts{display:flex;gap:6px;justify-content:flex-end}
 .newrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .newrow.cat{grid-template-columns:1fr auto}
-.newrow select{grid-column:1}
-.newrow button{grid-column:2}
 .logocard{background:#fff;border-radius:16px;padding:10px;max-width:440px;margin:26px auto 0}
 .logocard img{width:100%;height:auto;display:block}
 </style>
@@ -158,7 +172,8 @@ th:first-child,td:first-child{text-align:left}
 <header class="top">
   <img class="mark" src="mark.png" alt="">
   <div class="brand"><span class="b1">Stöberstuuv</span><span class="b2">Siebeneichen</span></div>
-  <button class="menu" id="menuBtn" onclick="go(view==='kasse'?'admin':'kasse')">Verwaltung</button>
+  <button class="help" onclick="showHelp()" aria-label="Hilfe: So geht's">?</button>
+  <button class="menu" id="menuBtn" onclick="toggleView()">Verwaltung</button>
 </header>
 <div id="banner"></div>
 <main id="app"></main>
@@ -174,7 +189,7 @@ const eur=c=>(c/100).toFixed(2).replace('.',',');
 /* ---------- Daten ---------- */
 const DEF_CATS=['Essen','Trinken','Kaffee & Kuchen'];
 const OLD_MAP={Bratwurst:'Essen',Pommes:'Essen',Bier:'Trinken',Wasser:'Trinken',Kuchen:'Kaffee & Kuchen',Kaffee:'Kaffee & Kuchen'};
-// bringt Daten aus älteren Versionen (ohne Kategorien) auf den aktuellen Stand
+// bringt Daten aus älteren Versionen auf den aktuellen Stand
 function norm(d){
  if(!Array.isArray(d.cats)||!d.cats.length)d.cats=DEF_CATS.map((n,i)=>({id:i+1,name:n}));
  d.nextCat=Math.max(Number.isInteger(d.nextCat)?d.nextCat:1,...d.cats.map(c=>c.id+1));
@@ -185,6 +200,7 @@ function norm(d){
  });
  d.next=Math.max(Number.isInteger(d.next)?d.next:1,...d.products.map(p=>p.id+1));
  d.lastBackup=d.lastBackup||0;d.backupCount=d.backupCount||0;
+ d.pin=typeof d.pin==='string'?d.pin:'';d.contact=typeof d.contact==='string'?d.contact:'';
  return d;
 }
 function defaults(){return norm({
@@ -194,13 +210,13 @@ function defaults(){return norm({
   {id:3,name:'Bier',price:300,cat:2},{id:4,name:'Wasser',price:150,cat:2},{id:5,name:'Apfelschorle',price:200,cat:2},
   {id:6,name:'Kaffee',price:150,cat:3},{id:7,name:'Kuchen',price:200,cat:3}],
  sales:[]})}
-let st;
-try{const s=localStorage.getItem('vereinskasse');if(s)st=JSON.parse(s)}catch(e){}
+let st,savedRaw=null;
+try{savedRaw=localStorage.getItem('vereinskasse');if(savedRaw)st=JSON.parse(savedRaw)}catch(e){}
 st=(st&&Array.isArray(st.products)&&Array.isArray(st.sales))?norm(st):defaults();
 let saveFail=false;
 const save=()=>{try{localStorage.setItem('vereinskasse',JSON.stringify(st));saveFail=false}catch(e){saveFail=true}};
 
-let view='kasse',adminTab='stat',cat=st.cats[0].id,cart={},paid='',sheet=false;
+let view='kasse',adminTab='stat',cat=st.cats[0].id,cart={},paid='',sheet=false,unlocked=false,pinCtx=null;
 const prodById=id=>st.products.find(p=>p.id==id);
 const catName=id=>{const c=st.cats.find(c=>c.id===id);return c?c.name:''};
 const total=()=>Object.entries(cart).reduce((a,[id,q])=>a+q*prodById(id).price,0);
@@ -218,7 +234,20 @@ function render(){
  const np=document.querySelector('.panel');if(np&&sc)np.scrollTop=sc;
  banner();
 }
-function go(v,t){view=v;if(t)adminTab=t;sheet=false;render();window.scrollTo(0,0);if(v==='admin'&&adminTab==='backup')persistInfo()}
+function toggleView(){if(view==='admin')go('kasse');else go('admin')}
+function go(v,t){
+ if(v==='admin'&&st.pin&&!unlocked){openAdmin(t);return}
+ if(v!=='admin')unlocked=false;
+ view=v;if(t)adminTab=t;sheet=false;render();window.scrollTo(0,0);
+ if(v==='admin'&&adminTab==='backup')persistInfo();
+}
+function openAdmin(t){
+ if(!st.pin){unlocked=true;go('admin',t);return}
+ pinDialog('Verwaltung öffnen','Gib die 4-stellige PIN ein.',v=>{
+  if(pinHash(v)!==st.pin)return 'Falsche PIN. Bitte noch einmal versuchen.';
+  unlocked=true;setTimeout(()=>go('admin',t),0);return true;
+ },true);
+}
 
 function kasse(){
  const c=curCat(),t=total(),n=count(),p=parse(paid),back=p===null?null:p-t,items=Object.entries(cart);
@@ -278,69 +307,160 @@ function askStaff(){
  const lines=items.map(([id,q])=>`${q}× ${esc(prodById(id).name)}`).join(', ');
  modal({title:'Für Personal buchen?',
   html:`<p>${lines}</p><p>Warenwert <b>${fmt(total())}</b>. Der Betrag wird nicht kassiert, die Artikel zählen aber in der Statistik mit.</p>`,
-  ok:'Ja, für Personal buchen',onOk:()=>{book(true);toast('Für Personal gebucht')}});
+  ok:'Ja, für Personal buchen',okClass:'staffok',onOk:()=>{book(true);toast('Für Personal gebucht')}});
 }
 function undo(){
  const s=st.sales[st.sales.length-1];if(!s)return;
  const what=s.staff?`Personal-Buchung (Warenwert ${fmt(s.items.reduce((a,i)=>a+i.q*i.price,0))})`:`Verkauf über ${fmt(s.total)}`;
- if(confirm('Letzte Buchung zurücknehmen?\n\n'+what)){st.sales.pop();save();render();toast('Buchung zurückgenommen')}
+ modal({title:'Letzte Buchung zurücknehmen?',html:`<p>${what}</p>`,ok:'Ja, zurücknehmen',okClass:'warnok',
+  onOk:()=>{st.sales.pop();save();render();toast('Buchung zurückgenommen')}});
 }
 
-/* ---------- Dialog und Hinweise ---------- */
-function modal({title,html,ok,onOk}){
- const m=document.getElementById('modal');
- m.innerHTML=`<div class="dlg" role="dialog" aria-modal="true" aria-labelledby="mt"><h2 id="mt">${title}</h2>${html}<div class="btns"><button class="ghost" id="mno">Abbrechen</button><button class="staffok" id="myes">${ok}</button></div></div>`;
+/* ---------- Dialoge und Hinweise ---------- */
+// Eigene Dialoge statt Browser-Fenster: gut lesbar, klare Knöpfe, kein „example.github.io sagt …“
+function modal({title,html,ok,onOk,cancel='Abbrechen',okClass='okbtn'}){
+ const m=document.getElementById('modal');pinCtx=null;
+ m.innerHTML=`<div class="dlg" role="dialog" aria-modal="true" aria-labelledby="mt"><h2 id="mt">${title}</h2>${html}<div class="btns">${cancel?`<button class="ghost" id="mno">${cancel}</button>`:''}<button class="${okClass}" id="myes">${ok}</button></div></div>`;
  m.classList.add('show');
- document.getElementById('mno').onclick=closeModal;
- document.getElementById('myes').onclick=()=>{closeModal();onOk()};
  m.onclick=e=>{if(e.target===m)closeModal()};
- document.getElementById('mno').focus();
+ if(cancel)document.getElementById('mno').onclick=closeModal;
+ document.getElementById('myes').onclick=()=>{closeModal();if(onOk)onOk()};
+ (document.getElementById('mno')||document.getElementById('myes')).focus();
 }
-function closeModal(){const m=document.getElementById('modal');m.classList.remove('show');m.innerHTML=''}
+function info(title,html){modal({title,html:`<p>${html}</p>`,ok:'OK',cancel:null})}
+function closeModal(){const m=document.getElementById('modal');m.classList.remove('show');m.innerHTML='';pinCtx=null}
 let tt;
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),3200)}
-addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();if(sheet)closeSheet()}});
+addEventListener('keydown',e=>{
+ if(pinCtx){
+  if(/^[0-9]$/.test(e.key)){pinCtx(e.key);return}
+  if(e.key==='Backspace'){pinCtx('b');return}
+ }
+ if(e.key==='Escape'){closeModal();if(sheet)closeSheet()}
+});
+// Verwaltung sperrt sich, wenn die App länger als eine Minute im Hintergrund war
+let hiddenAt=0;
+document.addEventListener('visibilitychange',()=>{
+ if(document.hidden){hiddenAt=Date.now();return}
+ if(st.pin&&hiddenAt&&Date.now()-hiddenAt>60000){unlocked=false;if(view==='admin')go('kasse')}
+});
 
-const REMIND_AFTER=15;
+function showHelp(){
+ const c=(st.contact||'').trim();
+ modal({title:"So geht's",cancel:null,ok:'Verstanden',html:`<ol>
+  <li>Oben die Kategorie wählen, zum Beispiel Essen.</li>
+  <li>Artikel so oft antippen, wie bestellt wurde.</li>
+  <li><b>Kassieren</b> antippen (auf dem Tablet steht die Bestellung rechts). Das gegebene Geld eintippen oder eine Schnellwahl wie „20 €“ drücken. Das Rückgeld steht groß darunter.</li>
+  <li><b>Verkauf abschließen</b> drücken. Fertig.</li></ol>
+  <p><b>Falsch gebucht?</b> In der Bestellung ganz unten „Letzte Buchung zurücknehmen“ drücken.</p>
+  <p><b>Für Helfer?</b> Artikel wählen, „Für Personal“ drücken und bestätigen. Es wird nichts kassiert.</p>
+  <p><b>App hängt?</b> Schließen und neu öffnen. Alle Buchungen bleiben erhalten.</p>
+  ${c?`<p><b>Bei Problemen:</b> ${esc(c)}</p>`:''}`});
+}
+
 function banner(){
  const b=document.getElementById('banner');
- const unsaved=Math.max(0,st.sales.length-st.backupCount);
  let h='';
- if(saveFail)h='<div><span><b>Speichern nicht möglich.</b> Der Browser blockiert den Speicher, die Daten gehen beim Schließen verloren. Sichere jetzt unter „Sicherung“.</span><button class="ghost" onclick="go(\'admin\',\'backup\')">Zur Sicherung</button></div>';
- else if(!(view==='admin'&&adminTab==='backup')&&unsaved>=REMIND_AFTER)h=`<div><span><b>${unsaved} Buchungen</b> seit der letzten Sicherung.</span><button class="ghost" onclick="go('admin','backup')">Jetzt sichern</button></div>`;
+ if(saveFail)h='<div><span><b>Speichern nicht möglich.</b> Der Browser blockiert den Speicher, die Daten gehen beim Schließen verloren.</span><button class="ghost" onclick="doBackup()">Jetzt sichern</button></div>';
+ else if(view==='admin'&&!st.pin)h=`<div><span><b>Noch keine PIN.</b> Jeder kann die Verwaltung öffnen.</span>${adminTab==='pin'?'':'<button class="ghost" onclick="go(\'admin\',\'pin\')">PIN festlegen</button>'}</div>`;
  b.innerHTML=h;
 }
 
+/* ---------- PIN ---------- */
+function h53(str){
+ let h1=0xdeadbeef,h2=0x41c6ce57;
+ for(let i=0,ch;i<str.length;i++){ch=str.charCodeAt(i);h1=Math.imul(h1^ch,2654435761);h2=Math.imul(h2^ch,1597334677)}
+ h1=Math.imul(h1^(h1>>>16),2246822507)^Math.imul(h2^(h2>>>13),3266489909);
+ h2=Math.imul(h2^(h2>>>16),2246822507)^Math.imul(h1^(h1>>>13),3266489909);
+ return (4294967296*(2097151&h2)+(h1>>>0)).toString(36);
+}
+const pinHash=p=>h53('stoeberstuuv:'+p);
+// Ziffernfeld: cb(pin) liefert true (fertig) oder eine Fehlermeldung (Text)
+function pinDialog(title,hint,cb,forgot){
+ let v='',err='';
+ const m=document.getElementById('modal');
+ const draw=()=>{
+  m.innerHTML=`<div class="dlg pin" role="dialog" aria-modal="true" aria-labelledby="mt"><h2 id="mt">${title}</h2><p class="hint">${hint}</p>
+  <div class="dots" role="img" aria-label="${v.length} von 4 Ziffern eingegeben">${[0,1,2,3].map(i=>`<i class="${i<v.length?'on':''}"></i>`).join('')}</div>
+  <p class="perr" role="alert">${err}</p>
+  <div class="pad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button data-k="${n}">${n}</button>`).join('')}<button class="ghost" data-k="c">Abbrechen</button><button data-k="0">0</button><button data-k="b" aria-label="Letzte Ziffer löschen">⌫</button></div>
+  ${forgot?'<button class="link" data-k="f">PIN vergessen?</button>':''}</div>`;
+  m.classList.add('show');
+  m.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>key(b.dataset.k));
+ };
+ const key=k=>{
+  if(k==='c'){closeModal();return}
+  if(k==='f'){forgotPin();return}
+  if(k==='b'){v=v.slice(0,-1);err='';draw();return}
+  if(v.length>=4)return;
+  v+=k;err='';
+  if(v.length<4){draw();return}
+  const r=cb(v);
+  if(r===true)closeModal();else{err=r||'';v='';draw()}
+ };
+ m.onclick=e=>{if(e.target===m)closeModal()};
+ draw();pinCtx=key;
+}
+function setPin(msg){
+ pinDialog('Neue PIN wählen',msg||'Wähle 4 Ziffern, die du dir gut merken kannst.',a=>{
+  setTimeout(()=>pinDialog('PIN wiederholen','Gib die gleiche PIN noch einmal ein.',b=>{
+   if(a!==b){setTimeout(()=>setPin('Die PINs stimmten nicht überein. Bitte neu festlegen.'),0);return true}
+   st.pin=pinHash(a);save();render();toast('PIN gespeichert');return true;
+  }),0);
+  return true;
+ });
+}
+function rmPin(){
+ modal({title:'PIN entfernen?',html:'<p>Danach kann jeder die Verwaltung öffnen.</p>',ok:'PIN entfernen',okClass:'warnok',onOk:()=>{st.pin='';save();render();toast('PIN entfernt')}});
+}
+function forgotPin(){
+ modal({title:'PIN vergessen?',cancel:'Schließen',ok:'Sicherung erstellen',onOk:()=>doBackup(),
+  html:'<p>Die PIN kann nur von der Person zurückgesetzt werden, die die Kasse eingerichtet hat. Die Kasse selbst funktioniert ganz normal weiter.</p><p>Damit nichts verloren geht, kannst du hier schon eine Sicherung der Buchungen erstellen.</p>'});
+}
+function setContact(v){st.contact=v.trim();save();toast('Gespeichert')}
+
 /* ---------- Verwaltung ---------- */
 function admin(){
- const tabs=[['stat','Statistik'],['art','Artikel'],['backup','Sicherung']];
+ const tabs=[['stat','Statistik'],['art','Artikel'],['backup','Sicherung'],['pin','Zugang']];
  return `<nav class="seg" role="tablist">${tabs.map(([k,l])=>`<button role="tab" aria-selected="${adminTab===k}" onclick="go('admin','${k}')">${l}</button>`).join('')}</nav>
- ${adminTab==='stat'?stat():adminTab==='art'?art():backup()}
+ ${adminTab==='stat'?stat():adminTab==='art'?art():adminTab==='backup'?backup():zugang()}
  <div class="logocard"><img src="logo.jpg" alt="Rümpel Profi's Stöberstuuv Siebeneichen"></div>`;
 }
 
-function stat(){
- const byA={},byC={};let rev=0,paying=0,pieces=0,sPieces=0,sVal=0;
+function aggregate(){
+ const g={byA:{},byC:{},rev:0,paying:0,pieces:0,sPieces:0,sVal:0};
  st.sales.forEach(s=>{
-  if(!s.staff){paying++;rev+=s.total}
+  if(!s.staff){g.paying++;g.rev+=s.total}
   s.items.forEach(i=>{
    const cn=i.cat||'Ohne Kategorie';
-   const a=byA[i.name]||(byA[i.name]={q:0,s:0,r:0}),c=byC[cn]||(byC[cn]={q:0,s:0,r:0});
+   const a=g.byA[i.name]||(g.byA[i.name]={q:0,s:0,r:0,cat:cn}),c=g.byC[cn]||(g.byC[cn]={q:0,s:0,r:0});
+   a.cat=cn;
    [a,c].forEach(o=>{o.q+=i.q;if(s.staff)o.s+=i.q;else o.r+=i.q*i.price});
-   pieces+=i.q;if(s.staff){sPieces+=i.q;sVal+=i.q*i.price}
+   g.pieces+=i.q;if(s.staff){g.sPieces+=i.q;g.sVal+=i.q*i.price}
   });
  });
- const arts=Object.entries(byA).sort((a,b)=>b[1].q-a[1].q),max=Math.max(1,...arts.map(r=>r[1].q));
- const cOrder=[...st.cats.map(c=>c.name).filter(n=>byC[n]),...Object.keys(byC).filter(n=>!st.cats.some(c=>c.name===n))];
+ g.cOrder=[...st.cats.map(c=>c.name).filter(n=>g.byC[n]),...Object.keys(g.byC).filter(n=>!st.cats.some(c=>c.name===n))];
+ return g;
+}
+function stat(){
+ const g=aggregate();
+ const arts=Object.entries(g.byA).sort((a,b)=>b[1].q-a[1].q),max=Math.max(1,...arts.map(r=>r[1].q));
  const head=(first,bar)=>`<tr><th>${first}</th><th>Menge</th><th>Personal</th><th>Umsatz</th>${bar?'<th class="bc"></th>':''}</tr>`;
  const row=(name,o,bar)=>`<tr><td>${esc(name)}</td><td>${o.q}</td><td>${o.s||'–'}</td><td>${fmt(o.r)}</td>${bar?`<td class="bc" style="width:26%"><div class="bar" style="width:${o.q/max*100}%"></div></td>`:''}</tr>`;
- return `<div class="kpis"><div><small>Umsatz</small><b>${fmt(rev)}</b></div><div><small>Verkäufe</small><b>${paying}</b></div><div><small>Artikel gesamt</small><b>${pieces}</b></div><div class="staff"><small>Für Personal</small><b>${sPieces} Stk</b><small>Warenwert ${fmt(sVal)}</small></div></div>
- ${st.sales.length?`<h3>Nach Kategorie</h3><div class="wrap"><table>${head('Kategorie')}${cOrder.map(n=>row(n,byC[n])).join('')}</table></div>
+ return `<div class="kpis"><div><small>Umsatz</small><b>${fmt(g.rev)}</b></div><div><small>Verkäufe</small><b>${g.paying}</b></div><div><small>Artikel gesamt</small><b>${g.pieces}</b></div><div class="staff"><small>Für Personal</small><b>${g.sPieces} Stk</b><small>Warenwert ${fmt(g.sVal)}</small></div></div>
+ ${st.sales.length?`<h3>Nach Kategorie</h3><div class="wrap"><table>${head('Kategorie')}${g.cOrder.map(n=>row(n,g.byC[n])).join('')}</table></div>
  <h3>Nach Artikel</h3><div class="wrap"><table>${head('Artikel',true)}${arts.map(([n,o])=>row(n,o,true)).join('')}</table></div>`:'<p class="empty">Noch keine Buchungen.</p>'}
- <p><button class="ghost danger" onclick="resetStats()">Statistik zurücksetzen (neues Event)</button></p>`;
+ <div class="box" style="margin-top:18px"><h2>Event beendet?</h2><p class="hint">Startet ein neues Event: Buchungen und Statistik werden gelöscht, Artikel und Preise bleiben. Vorher wird automatisch eine Sicherung erstellt.</p><div class="btns"><button class="ghost" ${st.sales.length?'':'disabled'} onclick="newEvent()">Neues Event starten</button></div></div>`;
 }
-function resetStats(){
- if(confirm('Alle Buchungen löschen? Sichere sie vorher am besten unter „Sicherung“. Das kann nicht rückgängig gemacht werden.')){st.sales=[];st.backupCount=0;save();render()}
+function newEvent(){
+ if(!st.sales.length)return;
+ modal({title:'Neues Event starten?',ok:'Sichern und neu starten',
+  html:'<p>Alle Buchungen und die Statistik werden gelöscht. Artikel, Kategorien und Preise bleiben erhalten.</p><p>Zuerst wird eine Sicherung erstellt. Schicke sie dir selbst zu, zum Beispiel per WhatsApp.</p>',
+  onOk:async()=>{
+   const ok=await doBackup();
+   if(ok){st.sales=[];st.backupCount=0;save();render();toast('Neues Event gestartet')}
+   else toast('Nichts gelöscht, die Sicherung wurde abgebrochen.');
+  }});
 }
 
 function catSel(sel,attrs){return `<select ${attrs}>${st.cats.map(c=>`<option value="${c.id}" ${c.id===sel?'selected':''}>${esc(c.name)}</option>`).join('')}</select>`}
@@ -350,7 +470,7 @@ function art(){
   return `<section class="box"><div class="cathead"><input type="text" value="${esc(k.name)}" aria-label="Name der Kategorie" onchange="renCat(${k.id},this.value)"><button class="ghost danger" onclick="delCat(${k.id})">Löschen</button></div>
   ${ps.map(x=>`<div class="prow"><input type="text" value="${esc(x.name)}" aria-label="Name" onchange="upd(${x.id},'name',this.value)"><input type="text" inputmode="decimal" value="${eur(x.price)}" aria-label="Preis in Euro" onchange="upd(${x.id},'price',this.value)">${catSel(x.cat,`aria-label="Kategorie" onchange="upd(${x.id},'cat',this.value)"`)}<span class="acts"><button class="sm" onclick="mv(${x.id},-1)" aria-label="nach oben">↑</button><button class="sm" onclick="mv(${x.id},1)" aria-label="nach unten">↓</button><button class="sm danger" onclick="del(${x.id})" aria-label="${esc(x.name)} löschen">✕</button></span></div>`).join('')||'<p class="empty">Keine Artikel in dieser Kategorie.</p>'}
   </section>`}).join('');
- return `<p class="hint">Preise in Euro, z. B. 2,50. Änderungen wirken sich nicht auf bereits gebuchte Verkäufe aus.</p>${secs}
+ return `<p class="hint">Änderungen speichert die App sofort auf diesem Gerät. Preise in Euro, z. B. 2,50. Bereits gebuchte Verkäufe ändern sich dadurch nicht. Für andere Geräte: Sicherung → „Artikel und Preise speichern“.</p>${secs}
  <section class="box"><h2>Neuer Artikel</h2><div class="newrow"><input type="text" id="nn" placeholder="Name"><input type="text" id="np" inputmode="decimal" placeholder="Preis">${catSel(curCat(),'id="ncat" aria-label="Kategorie"')}<button class="ghost" onclick="addP()">Hinzufügen</button></div></section>
  <section class="box"><h2>Neue Kategorie</h2><div class="newrow cat"><input type="text" id="nc" placeholder="z. B. Snacks"><button class="ghost" onclick="addCat()">Hinzufügen</button></div></section>`;
 }
@@ -366,31 +486,46 @@ function mv(id,d){
  const a=st.products.indexOf(p),b=st.products.indexOf(o);
  [st.products[a],st.products[b]]=[st.products[b],st.products[a]];save();render();
 }
-function del(id){if(confirm('Artikel löschen?')){st.products=st.products.filter(p=>p.id!=id);delete cart[id];save();render()}}
+function del(id){
+ const x=prodById(id);if(!x)return;
+ modal({title:'Artikel löschen?',html:`<p>„${esc(x.name)}“ wird gelöscht. Bereits gebuchte Verkäufe bleiben in der Statistik.</p>`,ok:'Ja, löschen',okClass:'warnok',
+  onOk:()=>{st.products=st.products.filter(p=>p.id!=id);delete cart[id];save();render()}});
+}
 function addP(){
  const n=document.getElementById('nn').value.trim(),p=parse(document.getElementById('np').value),c=parseInt(document.getElementById('ncat').value,10);
- if(!n||p===null||p<0){alert('Bitte Name und Preis eingeben.');return}
+ if(!n||p===null||p<0){info('Angaben fehlen','Bitte Name und Preis eingeben.');return}
  st.products.push({id:st.next++,name:n,price:p,cat:c});save();render();
 }
 function addCat(){
  const n=document.getElementById('nc').value.trim();
- if(!n){alert('Bitte einen Namen eingeben.');return}
+ if(!n){info('Name fehlt','Bitte einen Namen für die Kategorie eingeben.');return}
  st.cats.push({id:st.nextCat++,name:n});save();render();
 }
 function renCat(id,v){const c=st.cats.find(c=>c.id===id);if(v.trim())c.name=v.trim();save();render()}
 function delCat(id){
- if(st.cats.length<=1){alert('Mindestens eine Kategorie muss bleiben.');return}
- if(st.products.some(p=>p.cat===id)){alert('Verschiebe oder lösche zuerst die Artikel dieser Kategorie.');return}
- if(confirm('Kategorie „'+catName(id)+'“ löschen?')){st.cats=st.cats.filter(c=>c.id!==id);save();render()}
+ if(st.cats.length<=1){info('Nicht möglich','Mindestens eine Kategorie muss bleiben.');return}
+ if(st.products.some(p=>p.cat===id)){info('Kategorie nicht leer','Verschiebe oder lösche zuerst die Artikel dieser Kategorie.');return}
+ modal({title:'Kategorie löschen?',html:`<p>„${esc(catName(id))}“ wird gelöscht.</p>`,ok:'Ja, löschen',okClass:'warnok',onOk:()=>{st.cats=st.cats.filter(c=>c.id!==id);save();render()}});
+}
+
+function zugang(){
+ return `<div class="box"><h2>PIN für die Verwaltung</h2>
+  <p>${st.pin?'Die Verwaltung ist mit einer PIN geschützt.':'Noch keine PIN festgelegt. Jeder kann die Verwaltung öffnen.'}</p>
+  <p class="hint">Die PIN schützt vor versehentlichen Änderungen, zum Beispiel an Preisen oder der Statistik. Sie ist kein Schutz gegen gezielte Angriffe. Schreib dir die PIN an einem sicheren Ort auf: Wer sie vergisst, kann die Verwaltung nicht mehr öffnen. Die Kasse selbst funktioniert immer.</p>
+  <div class="btns"><button class="main" onclick="setPin()">${st.pin?'PIN ändern':'PIN festlegen'}</button>${st.pin?'<button class="ghost danger" onclick="rmPin()">PIN entfernen</button>':''}</div></div>
+ <div class="box"><h2>Wer hilft bei Problemen?</h2>
+  <p class="hint">Dieser Text steht im Hilfe-Fenster (Knopf „?“ oben), damit Helfer wissen, wen sie anrufen können.</p>
+  <input type="text" id="contact" placeholder="z. B. Anna Müller, 0171 1234567" value="${esc(st.contact||'')}" onchange="setContact(this.value)"></div>`;
 }
 
 /* ---------- Sicherung ---------- */
 function stamp(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}`}
 function backup(){
  const lb=st.lastBackup?new Date(st.lastBackup).toLocaleString('de-DE'):'noch nie';
- return `<div class="box"><h2>Datensicherung</h2><p>Letzte Sicherung: <b>${lb}</b></p><p class="hint">Sichere nach jedem Event und in längeren Pausen. Schicke die Datei an dich selbst (WhatsApp, E-Mail, Cloud), damit sie nicht nur auf diesem Gerät liegt.</p><div class="btns"><button class="main" onclick="doBackup()">Sicherung erstellen</button></div></div>
+ return `<div class="box"><h2>Alles sichern</h2><p>Letzte Sicherung: <b>${lb}</b></p><p class="hint">Enthält Artikel, Preise und alle Buchungen. Sichere nach jedem Event und in längeren Pausen. Schicke die Datei an dich selbst (WhatsApp, E-Mail, Cloud), damit sie nicht nur auf diesem Gerät liegt.</p><div class="btns"><button class="main" onclick="doBackup()">Sicherung erstellen</button></div></div>
  <div class="box"><h2>Sicherung einlesen</h2><p class="hint">Ersetzt alle Artikel und Buchungen auf diesem Gerät durch den Stand aus der Datei, zum Beispiel nach einem Geräteausfall.</p><div class="btns"><button class="ghost" onclick="document.getElementById('rf').click()">Datei auswählen</button><input id="rf" type="file" accept=".json,application/json" hidden onchange="doRestore(this)"></div></div>
- <div class="box"><h2>Für Excel</h2><p class="hint">Alle Buchungen als Tabelle (CSV), zum Beispiel für die Abrechnung.</p><div class="btns"><button class="ghost" onclick="doCsv()">Buchungen als CSV</button></div></div>
+ <div class="box"><h2>Artikel und Preise</h2><p class="hint">Nur Kategorien, Artikel und Preise, ohne Buchungen. Praktisch für ein zweites Gerät oder als Vorlage. Beim Laden bleiben die Buchungen auf dem Gerät erhalten.</p><div class="btns"><button class="ghost" onclick="doAssortSave()">Artikel und Preise speichern</button><button class="ghost" onclick="document.getElementById('af').click()">Artikel und Preise laden</button><input id="af" type="file" accept=".json,application/json" hidden onchange="doAssortLoad(this)"></div></div>
+ <div class="box"><h2>Abrechnung für Excel</h2><p class="hint">Eine einfache Tabelle: pro Artikel die verkaufte Menge und der Umsatz, unten die Gesamtsumme.</p><div class="btns"><button class="ghost" onclick="doCsv()">Abrechnung als Tabelle (CSV)</button></div></div>
  <div class="box"><h2>Speicher auf diesem Gerät</h2><p class="hint" id="pers">Wird geprüft …</p></div>`;
 }
 function persistInfo(){
@@ -409,47 +544,87 @@ async function deliver(blob,name,type){
  dl(blob,name);return true;
 }
 async function doBackup(){
- const data={app:'vereinskasse',version:2,exported:new Date().toISOString(),cats:st.cats,products:st.products,sales:st.sales,next:st.next,nextCat:st.nextCat};
+ // Die PIN gehört bewusst nicht in die Sicherung: Ein Ersatzgerät bekommt eine neue PIN.
+ const data={app:'vereinskasse',version:3,exported:new Date().toISOString(),cats:st.cats,products:st.products,sales:st.sales,next:st.next,nextCat:st.nextCat,contact:st.contact};
  const ok=await deliver(new Blob([JSON.stringify(data)],{type:'application/json'}),`vereinskasse_${stamp()}.json`,'application/json');
- if(ok){st.lastBackup=Date.now();st.backupCount=st.sales.length;save();render();if(adminTab==='backup')persistInfo()}
+ if(ok){st.lastBackup=Date.now();st.backupCount=st.sales.length;save();render();toast('Sicherung erstellt');if(view==='admin'&&adminTab==='backup')persistInfo()}
+ return !!ok;
+}
+function validAssort(d){
+ const I=Number.isInteger;
+ return !!d&&d.app==='vereinskasse'&&Array.isArray(d.products)
+  &&(d.cats===undefined||(Array.isArray(d.cats)&&d.cats.every(c=>c&&I(c.id)&&typeof c.name==='string')))
+  &&d.products.every(p=>p&&I(p.id)&&typeof p.name==='string'&&I(p.price));
 }
 function valid(d){
  const I=Number.isInteger;
- return d&&d.app==='vereinskasse'&&Array.isArray(d.products)&&Array.isArray(d.sales)
-  &&(d.cats===undefined||(Array.isArray(d.cats)&&d.cats.every(c=>c&&I(c.id)&&typeof c.name==='string')))
-  &&d.products.every(p=>p&&I(p.id)&&typeof p.name==='string'&&I(p.price))
+ return validAssort(d)&&Array.isArray(d.sales)
   &&d.sales.every(s=>s&&I(s.total)&&Array.isArray(s.items)&&s.items.every(i=>i&&typeof i.name==='string'&&I(i.price)&&I(i.q)));
 }
-function doRestore(inp){
+function readJson(inp,cb){
  const f=inp.files[0];if(!f)return;
  const r=new FileReader();
- r.onload=()=>{
-  try{
-   const d=JSON.parse(r.result);
-   if(!valid(d))throw new Error('format');
-   const when=d.exported?new Date(d.exported).toLocaleString('de-DE'):'unbekannt';
-   if(!confirm(`Sicherung vom ${when} einlesen?\n\n${d.products.length} Artikel, ${d.sales.length} Buchungen.\nDie aktuellen Daten auf diesem Gerät werden ersetzt.`)){inp.value='';return}
-   norm(d);
-   st.cats=d.cats;st.nextCat=d.nextCat;st.products=d.products;st.sales=d.sales;st.next=d.next;
-   st.lastBackup=Date.now();st.backupCount=st.sales.length;
-   cart={};paid='';cat=st.cats[0].id;save();inp.value='';render();
-   alert('Sicherung eingelesen.');
-  }catch(e){inp.value='';alert('Diese Datei ist keine gültige Vereinskasse-Sicherung.')}
- };
- r.onerror=()=>alert('Datei konnte nicht gelesen werden.');
+ r.onload=()=>{let d=null;try{d=JSON.parse(r.result)}catch(e){}cb(d);inp.value=''};
+ r.onerror=()=>{info('Fehler','Die Datei konnte nicht gelesen werden.');inp.value=''};
  r.readAsText(f);
 }
+function doRestore(inp){
+ readJson(inp,d=>{
+  if(!valid(d)){info('Datei nicht erkannt','Diese Datei ist keine gültige Sicherung der Vereinskasse.');return}
+  const when=d.exported?new Date(d.exported).toLocaleString('de-DE'):'unbekannt';
+  modal({title:'Sicherung einlesen?',ok:'Ja, einlesen',okClass:'warnok',
+   html:`<p>Sicherung vom ${when}: ${d.products.length} Artikel, ${d.sales.length} Buchungen.</p><p>Die aktuellen Daten auf diesem Gerät werden ersetzt.</p>`,
+   onOk:()=>{
+    norm(d);
+    st.cats=d.cats;st.nextCat=d.nextCat;st.products=d.products;st.sales=d.sales;st.next=d.next;
+    if(d.contact)st.contact=d.contact;
+    st.lastBackup=Date.now();st.backupCount=st.sales.length;
+    cart={};paid='';cat=st.cats[0].id;save();render();toast('Sicherung eingelesen');
+   }});
+ });
+}
+function assortData(){return{app:'vereinskasse',type:'sortiment',version:3,exported:new Date().toISOString(),cats:st.cats,products:st.products,next:st.next,nextCat:st.nextCat}}
+async function doAssortSave(){
+ const ok=await deliver(new Blob([JSON.stringify(assortData())],{type:'application/json'}),`artikel-und-preise_${stamp()}.json`,'application/json');
+ if(ok)toast('Artikel und Preise gespeichert');
+}
+function applyAssort(d){
+ const t=norm({cats:d.cats,products:d.products,next:d.next,nextCat:d.nextCat});
+ st.cats=t.cats;st.products=t.products;st.next=t.next;st.nextCat=t.nextCat;
+ cart={};paid='';cat=st.cats[0].id;save();render();
+}
+function doAssortLoad(inp){
+ readJson(inp,d=>{
+  if(!validAssort(d)){info('Datei nicht erkannt','Diese Datei enthält keine Artikel und Preise der Vereinskasse.');return}
+  const nc=(d.cats&&d.cats.length)||DEF_CATS.length;
+  modal({title:'Artikel und Preise laden?',ok:'Ja, laden',okClass:'warnok',
+   html:`<p>${d.products.length} Artikel in ${nc} Kategorien. Die jetzigen Artikel und Preise werden ersetzt. Buchungen bleiben erhalten.</p>`,
+   onOk:()=>{applyAssort(d);toast('Artikel und Preise geladen')}});
+ });
+}
 async function doCsv(){
- if(!st.sales.length){alert('Es gibt noch keine Buchungen.');return}
+ if(!st.sales.length){info('Keine Buchungen','Es gibt noch keine Buchungen.');return}
+ const g=aggregate();
  const q=v=>{let s=String(v);if(/^[=+\-@\t\r]/.test(s))s="'"+s;return /[";\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
- const rows=[['Nr','Datum','Uhrzeit','Art','Kategorie','Artikel','Menge','Einzelpreis','Betrag']];
- st.sales.forEach((s,i)=>{const d=new Date(s.time);s.items.forEach(it=>rows.push([i+1,d.toLocaleDateString('de-DE'),d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}),s.staff?'Personal':'Verkauf',it.cat||'',it.name,it.q,eur(it.price),s.staff?'0,00':eur(it.price*it.q)]))});
+ const rows=[['Kategorie','Artikel','Menge','davon Personal','Umsatz in €']];
+ g.cOrder.forEach(cn=>{
+  Object.entries(g.byA).filter(([,o])=>o.cat===cn).sort((a,b)=>b[1].q-a[1].q)
+   .forEach(([n,o])=>rows.push([cn,n,o.q,o.s,eur(o.r)]));
+ });
+ rows.push(['Gesamt','',g.pieces,g.sPieces,eur(g.rev)]);
  const csv='﻿'+rows.map(r=>r.map(q).join(';')).join('\r\n');
- await deliver(new Blob([csv],{type:'text/csv'}),`buchungen_${stamp()}.csv`,'text/csv');
+ await deliver(new Blob([csv],{type:'text/csv'}),`abrechnung_${stamp()}.csv`,'text/csv');
 }
 
 render();
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
+// Erster Start ohne gespeicherte Daten: optional Artikel und Preise aus sortiment.json übernehmen (siehe README)
+if(savedRaw===null&&typeof fetch==='function'){
+ fetch('sortiment.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(d=>{
+  try{if(localStorage.getItem('vereinskasse')!==null)return}catch(e){}
+  if(validAssort(d))applyAssort(d);
+ }).catch(()=>{});
+}
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 </script>
 </body>
