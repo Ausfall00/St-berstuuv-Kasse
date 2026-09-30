@@ -1,6 +1,11 @@
 // Offline-Modus: erst Netz (damit Updates ankommen), sonst Zwischenspeicher.
-const V = 'vereinskasse-v1';
-const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
+const V = 'vereinskasse-v2';
+const FILES = [
+  './', './index.html', './manifest.webmanifest',
+  './abril-fatface.woff2', './kaushan-script.woff2',
+  './mark.png', './logo.jpg',
+  './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'
+];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(V).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
