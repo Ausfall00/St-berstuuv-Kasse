@@ -1,5 +1,5 @@
 // Offline-Modus: erst Netz (damit Updates ankommen), sonst Zwischenspeicher.
-const V = 'vereinskasse-v3';
+const V = 'vereinskasse-v4';
 const FILES = [
   './', './index.html', './manifest.webmanifest',
   './abril-fatface.woff2', './kaushan-script.woff2',

@@ -33,8 +33,8 @@ Wichtig:
 
 ## 3. Einrichtung durch die Verantwortliche / den Verantwortlichen (einmalig pro Gerät)
 
-1. **Verwaltung → Zugang → PIN festlegen.** 4 Ziffern, zweimal eingeben. Die PIN an einem sicheren Ort notieren.
-2. **Verwaltung → Zugang → „Wer hilft bei Problemen?"**: Name und Telefonnummer eintragen. Der Text erscheint für alle Helfer im Hilfe-Fenster (Knopf „?" oben).
+1. **Verwaltung → Mehr → PIN festlegen.** 4 Ziffern, zweimal eingeben. Die PIN an einem sicheren Ort notieren.
+2. **Verwaltung → Mehr → „Wer hilft bei Problemen?"**: Name und Telefonnummer eintragen. Der Text erscheint für alle Helfer im Hilfe-Fenster (Knopf „?" oben).
 3. **Verwaltung → Artikel**: Kategorien, Artikel und Preise anpassen.
 4. **Verwaltung → Sicherung → Artikel und Preise speichern**: legt eine kleine Datei mit Sortiment und Preisen an (ohne Buchungen). Damit lässt sich das Sortiment auf weiteren Geräten laden (siehe Abschnitt 6).
 
@@ -47,6 +47,7 @@ Im Hilfe-Fenster („?" oben) steht dieselbe Kurzanleitung.
 - **Handy:** Unten erscheint die Leiste „Kassieren". Darin das gegebene Geld eintippen (oder Passend / 5 € / 10 € …). Das Rückgeld steht groß darunter.
 - **Tablet:** Die Bestellung steht dauerhaft rechts neben den Artikeln.
 - **Für Personal:** In der Bestellung „Für Personal" tippen und bestätigen. Es wird nichts kassiert, die Artikel zählen aber in der Statistik (Spalte „Personal") mit.
+- Nach jeder Buchung erscheint oben die **Bestellnummer** groß (bei Personal-Buchungen ebenfalls). Die Nummer nennst du dem Gast. Sie zählt fortlaufend von 1 bis 999 und beginnt bei „Neues Event starten“ wieder bei 1. Unter Verwaltung → Mehr lässt sie sich auch von Hand setzen.
 - Falsch gebucht? „Letzte Buchung zurücknehmen" macht die letzte Buchung rückgängig.
 
 ## 5. Verwaltung (mit PIN)
@@ -56,7 +57,7 @@ Oben rechts auf **Verwaltung** (zurück mit **Zur Kasse**). Sobald eine PIN gese
 - **Statistik:** Umsatz, Verkäufe, Artikel gesamt, Personal (Stückzahl und Warenwert), außerdem Mengen nach Kategorie und nach Artikel. „Neues Event starten" erstellt zuerst eine Sicherung und löscht dann Buchungen und Statistik. Artikel und Preise bleiben.
 - **Artikel:** Namen und Preise ändern, Artikel anlegen oder löschen, in eine andere Kategorie verschieben, mit den Pfeilen die Reihenfolge festlegen. Kategorien umbenennen, anlegen und (wenn leer) löschen. Änderungen werden sofort auf dem Gerät gespeichert. Preise in Euro, z. B. `2,50`.
 - **Sicherung:** siehe unten.
-- **Zugang:** PIN ändern oder entfernen, Kontaktzeile für das Hilfe-Fenster.
+- **Mehr:** PIN ändern oder entfernen, Kontaktzeile für das Hilfe-Fenster, Bestellnummern und Küchenbon (Abschnitt 8).
 
 Die PIN schützt vor versehentlichen Änderungen und neugierigen Fingern. Sie ist kein Schutz gegen gezielte Angriffe.
 
@@ -86,6 +87,24 @@ Benenne die Datei aus „Artikel und Preise speichern" in `sortiment.json` um un
 ## 7. Neue Version einspielen
 
 Auf GitHub im Repository: **Add file → Upload files**, alle neuen Dateien hineinziehen (gleiche Namen werden ersetzt) → **Commit changes**. Nach etwa einer Minute ist die Seite aktualisiert, die App holt sich die neue Version beim nächsten Öffnen mit Internet (ggf. einmal komplett schließen und neu öffnen). Gespeicherte Artikel, Preise, Buchungen und die PIN bleiben erhalten.
+
+## 8. Küchenbon-Drucker (optional, vorbereitet)
+
+Die Kasse kann zu jeder Bestellung einen Bon für die Küche drucken: große Nummer, Uhrzeit, Artikel mit Menge. Personal-Bestellungen sind als „*** Personal ***“ markiert. Ohne Drucker bleibt alles aus, die Bestellnummer erscheint trotzdem.
+
+**Was du brauchst:** einen Bon-Drucker mit **Bluetooth (BLE)** und **ESC/POS** (58 mm oder 80 mm) und ein Android-Gerät mit **Chrome**. iPhone/iPad (Safari) können keine Bluetooth-Drucker ansteuern. Vor dem Kauf prüfen, ob der Drucker mit Android-Apps per Bluetooth funktioniert (manche ältere Drucker können nur „klassisches“ Bluetooth und gehen nicht).
+
+**Einrichten (einmalig):**
+1. Drucker einschalten, Papier einlegen.
+2. Verwaltung → Mehr → Küchenbon: **Bons drucken** einschalten, Papierbreite wählen (58 mm = 32 Zeichen, 80 mm = 48).
+3. **Drucker verbinden**, den Drucker in der Liste wählen (Bluetooth bzw. „Geräte in der Nähe“ und ggf. Standort am Tablet erlauben).
+4. **Test-Druck** drücken.
+5. Kategorien ankreuzen, die auf den Bon sollen (z. B. nur Essen).
+6. Mit **Vorschau ansehen** lässt sich der Bon auch ohne Drucker anschauen.
+
+Nach dem Neustart verbindet sich die App meist von selbst wieder. Klappt das nicht, oben auf der Kasse „Verbinden“ tippen. Ein Druckfehler blockiert nie die Buchung, der Hinweis erscheint oben, dort lässt sich der Bon mit „Bon drucken“ wiederholen.
+
+**Wenn etwas falsch gedruckt wird:** unter „Erweitert“ den Zeichensatz wechseln (Umlaute falsch), die Übertragung auf „sicher“ stellen (Zeichensalat/Abbrüche) oder den Abschneider einschalten, falls der Drucker einen hat. Die Druckfunktion wurde nur mit einem simulierten Gerät getestet, kleine Anpassungen am echten Drucker sind möglich.
 
 ## Dateien
 

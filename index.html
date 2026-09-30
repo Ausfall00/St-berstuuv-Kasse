@@ -166,6 +166,27 @@ th:first-child,td:first-child{text-align:left}
 .newrow.cat{grid-template-columns:1fr auto}
 .logocard{background:#fff;border-radius:16px;padding:10px;max-width:440px;margin:26px auto 0}
 .logocard img{width:100%;height:auto;display:block}
+.lastorder{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;background:var(--glow);border:1px solid var(--or);border-left-width:6px;border-radius:12px;padding:8px 10px 8px 14px;margin-bottom:10px}
+.lastorder.staff{background:var(--staff);border-color:var(--copper)}
+.lo-nr{display:flex;flex-direction:column;line-height:1;min-width:64px}
+.lo-nr small{color:var(--mute);font-size:.8rem;margin-bottom:2px}
+.lo-nr b{font:400 2.4rem "Abril Fatface",Georgia,serif}
+.lo-info{flex:1 1 120px;font-size:.95rem;min-width:0}
+.lastorder>button{flex:none}
+.lastorder>.sm{margin-left:auto}
+.lo-info span{display:block;color:var(--mute);font-size:.85rem}
+.lo-info span.bad{color:var(--warn);font-weight:600}
+.printstat{display:flex;align-items:center;gap:8px;font-size:.9rem;color:var(--mute);margin:0 2px 10px}
+.printstat i{width:10px;height:10px;border-radius:50%;background:var(--line);display:inline-block;flex:none}
+.printstat i.on{background:#3a9d5d}
+.printstat .ghost{min-height:36px;padding:4px 12px}
+.paper{box-sizing:content-box;background:#fff;color:#1c1714;width:32ch;max-width:100%;margin:12px auto 0;padding:14px 12px;font-family:ui-monospace,Menlo,Consolas,"DejaVu Sans Mono",monospace;font-size:13px;line-height:1.35;border:1px solid var(--line);overflow:hidden}
+.paper div{white-space:pre}
+.chk{display:flex;align-items:center;gap:10px;min-height:44px}
+.chk input{width:22px;height:22px;flex:none}
+details.adv{margin-top:10px}
+details.adv summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--mute)}
+.field{display:grid;gap:4px;margin:10px 0}
 </style>
 </head>
 <body data-view="kasse">
@@ -201,6 +222,10 @@ function norm(d){
  d.next=Math.max(Number.isInteger(d.next)?d.next:1,...d.products.map(p=>p.id+1));
  d.lastBackup=d.lastBackup||0;d.backupCount=d.backupCount||0;
  d.pin=typeof d.pin==='string'?d.pin:'';d.contact=typeof d.contact==='string'?d.contact:'';
+ d.orderNo=Number.isInteger(d.orderNo)&&d.orderNo>=1&&d.orderNo<=999?d.orderNo:1;
+ d.bon=Object.assign({on:false,auto:true,title:'Stöberstuuv Siebeneichen',width:32,charset:'437',speed:'safe',cutter:false,device:''},d.bon||{});
+ if(!Array.isArray(d.bonCats)){const e=d.cats.find(c=>c.name==='Essen')||d.cats[0];d.bonCats=[e.id]}
+ d.bonCats=d.bonCats.filter(id=>d.cats.some(c=>c.id===id));
  return d;
 }
 function defaults(){return norm({
@@ -216,7 +241,7 @@ st=(st&&Array.isArray(st.products)&&Array.isArray(st.sales))?norm(st):defaults()
 let saveFail=false;
 const save=()=>{try{localStorage.setItem('vereinskasse',JSON.stringify(st));saveFail=false}catch(e){saveFail=true}};
 
-let view='kasse',adminTab='stat',cat=st.cats[0].id,cart={},paid='',sheet=false,unlocked=false,pinCtx=null;
+let view='kasse',adminTab='stat',cat=st.cats[0].id,cart={},paid='',sheet=false,unlocked=false,pinCtx=null,lastOrder=null;
 const prodById=id=>st.products.find(p=>p.id==id);
 const catName=id=>{const c=st.cats.find(c=>c.id===id);return c?c.name:''};
 const total=()=>Object.entries(cart).reduce((a,[id,q])=>a+q*prodById(id).price,0);
@@ -258,7 +283,7 @@ function kasse(){
  const grid=prods.length?prods.map(x=>`<button class="prod" onclick="add(${x.id})">${cart[x.id]?`<i class="qty">${cart[x.id]}</i>`:''}<b>${esc(x.name)}</b><span>${fmt(x.price)}</span></button>`).join(''):`<p class="empty">In „${esc(catName(c))}“ gibt es noch keine Artikel. Lege sie unter Verwaltung → Artikel an.</p>`;
  const lines=items.length?items.map(([id,q])=>{const x=prodById(id);return `<div class="row"><span class="n">${esc(x.name)}</span><button class="sm" onclick="chg(${id},-1)" aria-label="${esc(x.name)} weniger">−</button><b>${q}</b><button class="sm" onclick="chg(${id},1)" aria-label="${esc(x.name)} mehr">+</button><span class="s">${fmt(q*x.price)}</span></div>`}).join(''):'<p class="empty">Tippe auf einen Artikel, um ihn hinzuzufügen.</p>';
  const neg=back!==null&&back<0;
- return `<div class="kasse"><section><nav class="cats" role="tablist" aria-label="Kategorien">${tabs}</nav><div class="grid">${grid}</div></section>
+ return `<div class="kasse"><section>${lastStrip()}${printStat()}<nav class="cats" role="tablist" aria-label="Kategorien">${tabs}</nav><div class="grid">${grid}</div></section>
  <aside class="panel ${sheet?'open':''}" aria-label="Bestellung">
   <div class="phead"><h2>Bestellung</h2><button class="ghost closebtn" onclick="closeSheet()">Schließen</button></div>
   ${lines}
@@ -291,29 +316,54 @@ function setPaid(v){
 }
 
 /* ---------- Buchen ---------- */
-function book(staff){
- st.sales.push({time:Date.now(),total:staff?0:total(),staff:!!staff,
-  items:Object.entries(cart).map(([id,q])=>{const x=prodById(id);return{name:x.name,price:x.price,q,cat:catName(x.cat)}})});
- save();cart={};paid='';sheet=false;render();
+function book(staff,change){
+ const items=Object.entries(cart).map(([id,q])=>({x:prodById(id),q}))
+  .sort((a,b)=>st.cats.findIndex(c=>c.id===a.x.cat)-st.cats.findIndex(c=>c.id===b.x.cat)||st.products.indexOf(a.x)-st.products.indexOf(b.x))
+  .map(({x,q})=>({name:x.name,price:x.price,q,cat:catName(x.cat)}));
+ const sale={time:Date.now(),nr:takeNo(),total:staff?0:total(),staff:!!staff,items};
+ st.sales.push(sale);save();
+ const auto=st.bon.on&&st.bon.auto;
+ lastOrder={nr:sale.nr,staff:!!staff,change:change||0,print:auto?'busy':undefined};
+ cart={};paid='';sheet=false;render();
+ if(auto)autoPrint(sale);
+ return sale;
 }
+function takeNo(){const n=st.orderNo||1;st.orderNo=n>=999?1:n+1;return n}
 function done(){
  if(!count())return;
  const t=total(),p=parse(paid),back=p===null?0:p-t;
- book(false);
- toast('Gebucht: '+fmt(t)+(back>0?' · Rückgeld '+fmt(back):''));
+ book(false,back>0?back:0);
+}
+function dismissLast(){lastOrder=null;render()}
+function lastStrip(){
+ const o=lastOrder;if(!o)return '';
+ const info=o.staff?'Nicht kassiert':(o.change>0?`Rückgeld <b>${fmt(o.change)}</b>`:'Gebucht');
+ const ps={ok:'Bon gedruckt',fail:'Bon nicht gedruckt. '+(o.err||''),busy:'Bon wird gedruckt …',none:'Kein Küchenartikel, daher kein Bon'}[o.print];
+ return `<div class="lastorder ${o.staff?'staff':''}" role="status"><div class="lo-nr"><small>${o.staff?'Personal':'Bestellung'}</small><b>${o.nr}</b></div><div class="lo-info">${info}${ps?`<span class="${o.print==='fail'?'bad':''}">${esc(ps)}</span>`:''}</div>${st.bon.on&&o.print!=='busy'?'<button class="ghost" onclick="reprint()">Bon drucken</button>':''}<button class="sm" onclick="dismissLast()" aria-label="Schließen">✕</button></div>`;
+}
+function refreshStrip(){const el=document.querySelector('.lastorder');if(el)el.outerHTML=lastStrip()}
+function printStat(){
+ if(!st.bon.on)return '';
+ const on=printerReady();
+ return `<div class="printstat"><i class="${on?'on':''}"></i><span>${on?'Bon-Drucker verbunden':'Bon-Drucker nicht verbunden'}</span>${on?'':'<button class="ghost" onclick="connectClick()">Verbinden</button>'}</div>`;
 }
 function askStaff(){
  const items=Object.entries(cart);if(!items.length)return;
  const lines=items.map(([id,q])=>`${q}× ${esc(prodById(id).name)}`).join(', ');
  modal({title:'Für Personal buchen?',
   html:`<p>${lines}</p><p>Warenwert <b>${fmt(total())}</b>. Der Betrag wird nicht kassiert, die Artikel zählen aber in der Statistik mit.</p>`,
-  ok:'Ja, für Personal buchen',okClass:'staffok',onOk:()=>{book(true);toast('Für Personal gebucht')}});
+  ok:'Ja, für Personal buchen',okClass:'staffok',onOk:()=>{book(true)}});
 }
 function undo(){
  const s=st.sales[st.sales.length-1];if(!s)return;
- const what=s.staff?`Personal-Buchung (Warenwert ${fmt(s.items.reduce((a,i)=>a+i.q*i.price,0))})`:`Verkauf über ${fmt(s.total)}`;
+ const what=(s.nr?`Bestellung ${s.nr}: `:'')+(s.staff?`Personal-Buchung (Warenwert ${fmt(s.items.reduce((a,i)=>a+i.q*i.price,0))})`:`Verkauf über ${fmt(s.total)}`);
  modal({title:'Letzte Buchung zurücknehmen?',html:`<p>${what}</p>`,ok:'Ja, zurücknehmen',okClass:'warnok',
-  onOk:()=>{st.sales.pop();save();render();toast('Buchung zurückgenommen')}});
+  onOk:()=>{
+   const s2=st.sales.pop();
+   if(s2.nr&&(st.orderNo-1===s2.nr||(st.orderNo===1&&s2.nr===999)))st.orderNo=s2.nr;
+   if(lastOrder&&lastOrder.nr===s2.nr)lastOrder=null;
+   save();render();toast('Buchung zurückgenommen');
+  }});
 }
 
 /* ---------- Dialoge und Hinweise ---------- */
@@ -351,7 +401,7 @@ function showHelp(){
   <li>Oben die Kategorie wählen, zum Beispiel Essen.</li>
   <li>Artikel so oft antippen, wie bestellt wurde.</li>
   <li><b>Kassieren</b> antippen (auf dem Tablet steht die Bestellung rechts). Das gegebene Geld eintippen oder eine Schnellwahl wie „20 €“ drücken. Das Rückgeld steht groß darunter.</li>
-  <li><b>Verkauf abschließen</b> drücken. Fertig.</li></ol>
+  <li><b>Verkauf abschließen</b> drücken. Oben erscheint die Bestellnummer, die du dem Gast nennst.</li></ol>
   <p><b>Falsch gebucht?</b> In der Bestellung ganz unten „Letzte Buchung zurücknehmen“ drücken.</p>
   <p><b>Für Helfer?</b> Artikel wählen, „Für Personal“ drücken und bestätigen. Es wird nichts kassiert.</p>
   <p><b>App hängt?</b> Schließen und neu öffnen. Alle Buchungen bleiben erhalten.</p>
@@ -362,7 +412,7 @@ function banner(){
  const b=document.getElementById('banner');
  let h='';
  if(saveFail)h='<div><span><b>Speichern nicht möglich.</b> Der Browser blockiert den Speicher, die Daten gehen beim Schließen verloren.</span><button class="ghost" onclick="doBackup()">Jetzt sichern</button></div>';
- else if(view==='admin'&&!st.pin)h=`<div><span><b>Noch keine PIN.</b> Jeder kann die Verwaltung öffnen.</span>${adminTab==='pin'?'':'<button class="ghost" onclick="go(\'admin\',\'pin\')">PIN festlegen</button>'}</div>`;
+ else if(view==='admin'&&!st.pin)h=`<div><span><b>Noch keine PIN.</b> Jeder kann die Verwaltung öffnen.</span>${adminTab==='more'?'':'<button class="ghost" onclick="go(\'admin\',\'more\')">PIN festlegen</button>'}</div>`;
  b.innerHTML=h;
 }
 
@@ -421,9 +471,9 @@ function setContact(v){st.contact=v.trim();save();toast('Gespeichert')}
 
 /* ---------- Verwaltung ---------- */
 function admin(){
- const tabs=[['stat','Statistik'],['art','Artikel'],['backup','Sicherung'],['pin','Zugang']];
+ const tabs=[['stat','Statistik'],['art','Artikel'],['backup','Sicherung'],['more','Mehr']];
  return `<nav class="seg" role="tablist">${tabs.map(([k,l])=>`<button role="tab" aria-selected="${adminTab===k}" onclick="go('admin','${k}')">${l}</button>`).join('')}</nav>
- ${adminTab==='stat'?stat():adminTab==='art'?art():adminTab==='backup'?backup():zugang()}
+ ${adminTab==='stat'?stat():adminTab==='art'?art():adminTab==='backup'?backup():mehr()}
  <div class="logocard"><img src="logo.jpg" alt="Rümpel Profi's Stöberstuuv Siebeneichen"></div>`;
 }
 
@@ -458,7 +508,7 @@ function newEvent(){
   html:'<p>Alle Buchungen und die Statistik werden gelöscht. Artikel, Kategorien und Preise bleiben erhalten.</p><p>Zuerst wird eine Sicherung erstellt. Schicke sie dir selbst zu, zum Beispiel per WhatsApp.</p>',
   onOk:async()=>{
    const ok=await doBackup();
-   if(ok){st.sales=[];st.backupCount=0;save();render();toast('Neues Event gestartet')}
+   if(ok){st.sales=[];st.backupCount=0;st.orderNo=1;lastOrder=null;save();render();toast('Neues Event gestartet')}
    else toast('Nichts gelöscht, die Sicherung wurde abgebrochen.');
   }});
 }
@@ -505,17 +555,27 @@ function renCat(id,v){const c=st.cats.find(c=>c.id===id);if(v.trim())c.name=v.tr
 function delCat(id){
  if(st.cats.length<=1){info('Nicht möglich','Mindestens eine Kategorie muss bleiben.');return}
  if(st.products.some(p=>p.cat===id)){info('Kategorie nicht leer','Verschiebe oder lösche zuerst die Artikel dieser Kategorie.');return}
- modal({title:'Kategorie löschen?',html:`<p>„${esc(catName(id))}“ wird gelöscht.</p>`,ok:'Ja, löschen',okClass:'warnok',onOk:()=>{st.cats=st.cats.filter(c=>c.id!==id);save();render()}});
+ modal({title:'Kategorie löschen?',html:`<p>„${esc(catName(id))}“ wird gelöscht.</p>`,ok:'Ja, löschen',okClass:'warnok',onOk:()=>{st.cats=st.cats.filter(c=>c.id!==id);st.bonCats=st.bonCats.filter(x=>x!==id);save();render()}});
 }
 
-function zugang(){
+function mehr(){
  return `<div class="box"><h2>PIN für die Verwaltung</h2>
   <p>${st.pin?'Die Verwaltung ist mit einer PIN geschützt.':'Noch keine PIN festgelegt. Jeder kann die Verwaltung öffnen.'}</p>
   <p class="hint">Die PIN schützt vor versehentlichen Änderungen, zum Beispiel an Preisen oder der Statistik. Sie ist kein Schutz gegen gezielte Angriffe. Schreib dir die PIN an einem sicheren Ort auf: Wer sie vergisst, kann die Verwaltung nicht mehr öffnen. Die Kasse selbst funktioniert immer.</p>
   <div class="btns"><button class="main" onclick="setPin()">${st.pin?'PIN ändern':'PIN festlegen'}</button>${st.pin?'<button class="ghost danger" onclick="rmPin()">PIN entfernen</button>':''}</div></div>
  <div class="box"><h2>Wer hilft bei Problemen?</h2>
   <p class="hint">Dieser Text steht im Hilfe-Fenster (Knopf „?“ oben), damit Helfer wissen, wen sie anrufen können.</p>
-  <input type="text" id="contact" placeholder="z. B. Anna Müller, 0171 1234567" value="${esc(st.contact||'')}" onchange="setContact(this.value)"></div>`;
+  <input type="text" id="contact" placeholder="z. B. Anna Müller, 0171 1234567" value="${esc(st.contact||'')}" onchange="setContact(this.value)"></div>
+ <div class="box"><h2>Bestellnummern</h2>
+  <p class="hint">Jede Buchung bekommt eine fortlaufende Nummer. Mit „Neues Event starten“ beginnt die Zählung wieder bei 1. Nach 999 geht es wieder bei 1 los.</p>
+  <p>Nächste Nummer: <b>${st.orderNo}</b></p>
+  <div class="newrow cat"><input type="text" id="onr" inputmode="numeric" placeholder="Neue Nummer, z. B. 1"><button class="ghost" onclick="setOrderNo()">Setzen</button></div></div>
+ ${bonBox()}`;
+}
+function setOrderNo(){
+ const n=parseInt(document.getElementById('onr').value,10);
+ if(!(n>=1&&n<=999)){info('Nummer ungültig','Bitte eine Zahl von 1 bis 999 eingeben.');return}
+ st.orderNo=n;save();render();toast('Nächste Nummer: '+n);
 }
 
 /* ---------- Sicherung ---------- */
@@ -545,7 +605,7 @@ async function deliver(blob,name,type){
 }
 async function doBackup(){
  // Die PIN gehört bewusst nicht in die Sicherung: Ein Ersatzgerät bekommt eine neue PIN.
- const data={app:'vereinskasse',version:3,exported:new Date().toISOString(),cats:st.cats,products:st.products,sales:st.sales,next:st.next,nextCat:st.nextCat,contact:st.contact};
+ const data={app:'vereinskasse',version:3,exported:new Date().toISOString(),cats:st.cats,products:st.products,sales:st.sales,next:st.next,nextCat:st.nextCat,contact:st.contact,orderNo:st.orderNo,bon:st.bon,bonCats:st.bonCats};
  const ok=await deliver(new Blob([JSON.stringify(data)],{type:'application/json'}),`vereinskasse_${stamp()}.json`,'application/json');
  if(ok){st.lastBackup=Date.now();st.backupCount=st.sales.length;save();render();toast('Sicherung erstellt');if(view==='admin'&&adminTab==='backup')persistInfo()}
  return !!ok;
@@ -577,20 +637,21 @@ function doRestore(inp){
    onOk:()=>{
     norm(d);
     st.cats=d.cats;st.nextCat=d.nextCat;st.products=d.products;st.sales=d.sales;st.next=d.next;
+    st.orderNo=d.orderNo;st.bon=d.bon;st.bonCats=d.bonCats;lastOrder=null;
     if(d.contact)st.contact=d.contact;
     st.lastBackup=Date.now();st.backupCount=st.sales.length;
     cart={};paid='';cat=st.cats[0].id;save();render();toast('Sicherung eingelesen');
    }});
  });
 }
-function assortData(){return{app:'vereinskasse',type:'sortiment',version:3,exported:new Date().toISOString(),cats:st.cats,products:st.products,next:st.next,nextCat:st.nextCat}}
+function assortData(){return{app:'vereinskasse',type:'sortiment',version:3,exported:new Date().toISOString(),cats:st.cats,products:st.products,next:st.next,nextCat:st.nextCat,bonCats:st.bonCats}}
 async function doAssortSave(){
  const ok=await deliver(new Blob([JSON.stringify(assortData())],{type:'application/json'}),`artikel-und-preise_${stamp()}.json`,'application/json');
  if(ok)toast('Artikel und Preise gespeichert');
 }
 function applyAssort(d){
- const t=norm({cats:d.cats,products:d.products,next:d.next,nextCat:d.nextCat});
- st.cats=t.cats;st.products=t.products;st.next=t.next;st.nextCat=t.nextCat;
+ const t=norm({cats:d.cats,products:d.products,next:d.next,nextCat:d.nextCat,bonCats:d.bonCats});
+ st.cats=t.cats;st.products=t.products;st.next=t.next;st.nextCat=t.nextCat;st.bonCats=t.bonCats;
  cart={};paid='';cat=st.cats[0].id;save();render();
 }
 function doAssortLoad(inp){
@@ -616,7 +677,223 @@ async function doCsv(){
  await deliver(new Blob([csv],{type:'text/csv'}),`abrechnung_${stamp()}.csv`,'text/csv');
 }
 
+/* ---------- Küchenbon (ESC/POS über Bluetooth) ---------- */
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+// Häufige Bluetooth-LE-Dienste günstiger Bondrucker; der Schreibkanal wird beim Verbinden automatisch gesucht
+const PRINTER_SERVICES=['000018f0-0000-1000-8000-00805f9b34fb','e7810a71-73ae-499d-8c15-faa9aef0c3f2','49535343-fe7d-4ae5-8fa9-9fafd205e455','6e400001-b5a3-f393-a0a9-e50e24dcca9e','0000ffe0-0000-1000-8000-00805f9b34fb','0000ff00-0000-1000-8000-00805f9b34fb','0000fee7-0000-1000-8000-00805f9b34fb','0000ae30-0000-1000-8000-00805f9b34fb'];
+const pr={dev:null,ch:null};
+const SPEED={safe:{chunk:20,delay:30},fast:{chunk:100,delay:10}};
+const CP437={'ä':0x84,'ö':0x94,'ü':0x81,'Ä':0x8E,'Ö':0x99,'Ü':0x9A,'ß':0xE1,'é':0x82,'è':0x8A,'à':0x85,'â':0x83,'ê':0x88,'ç':0x87,'É':0x90,'ñ':0xA4};
+const ASCII_TR={'ä':'ae','ö':'oe','ü':'ue','Ä':'Ae','Ö':'Oe','Ü':'Ue','ß':'ss','é':'e','è':'e','à':'a','â':'a','ê':'e','ç':'c','É':'E','ñ':'n'};
+const bonCols=()=>st.bon.width===48?48:32;
+const printerReady=()=>!!(pr.ch&&pr.dev&&pr.dev.gatt&&pr.dev.gatt.connected);
+// Text für Bon und Vorschau gleich aufbereiten
+function prep(s){
+ let t=String(s).replace(/×/g,'x').replace(/[–—]/g,'-').replace(/€/g,'EUR').replace(/[„“”]/g,'"').replace(/[’‘]/g,"'");
+ if(st.bon.charset==='ascii')t=t.replace(/[äöüÄÖÜßéèàâêçÉñ]/g,c=>ASCII_TR[c]);
+ return t;
+}
+function enc(s){
+ const o=[];
+ for(const ch of s){
+  const c=ch.codePointAt(0);
+  if(c>=32&&c<127)o.push(c);
+  else if(st.bon.charset!=='ascii'&&CP437[ch]!==undefined)o.push(CP437[ch]);
+  else o.push(0x3F);
+ }
+ return o;
+}
+// Zeilenumbruch mit Einrückung der Folgezeilen, lange Wörter werden getrennt
+function wrap(s,max,indent=0){
+ const out=[];let cur='';
+ const lim=()=>out.length?max-indent:max;
+ for(let w of String(s).split(/\s+/).filter(Boolean)){
+  while(w.length>lim()){
+   if(cur){out.push(cur);cur=''}
+   const n=lim();out.push(w.slice(0,n));w=w.slice(n);
+  }
+  if(!cur)cur=w;
+  else if((cur+' '+w).length<=lim())cur+=' '+w;
+  else{out.push(cur);cur=w}
+ }
+ if(cur||!out.length)out.push(cur);
+ return out.map((l,i)=>(i?' '.repeat(indent):'')+l);
+}
+const mkAdd=(ops,cols)=>(t,o={})=>wrap(prep(t),Math.floor(cols/(o.w||1)),o.indent||0).forEach(l=>ops.push({s:l,a:o.a||'l',w:o.w||1,h:o.h||1,b:!!o.b}));
+function bonItems(s){const names=st.bonCats.map(catName);return s.items.filter(i=>names.includes(i.cat))}
+// Ein Bon als Liste von Zeilen (eine Quelle für Druck und Vorschau); null = keine Küchenartikel
+function buildBon(s,all){
+ const items=all?s.items:bonItems(s);
+ if(!items.length)return null;
+ const cols=bonCols(),ops=[],add=mkAdd(ops,cols),rule=()=>ops.push({s:'-'.repeat(cols),a:'l',w:1,h:1,b:false});
+ const d=new Date(s.time||Date.now());
+ if((st.bon.title||'').trim()){add(st.bon.title.trim(),{a:'c',b:true});rule()}
+ if(s.staff)add('*** Personal ***',{a:'c',b:true,w:2,h:2});else add('Bestellung',{a:'c'});
+ add(String(s.nr||'-'),{a:'c',b:true,w:4,h:4});
+ add(d.toLocaleDateString('de-DE')+' '+d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}),{a:'c'});
+ rule();
+ items.forEach(i=>add(`${i.q}x ${i.name}`,{b:true,h:2,indent:String(i.q).length+2}));
+ rule();
+ ops.push({feed:4});
+ return ops;
+}
+function testOps(){
+ const cols=bonCols(),ops=[],add=mkAdd(ops,cols);
+ add('Test-Druck',{a:'c',b:true,w:2,h:2});
+ ops.push({s:'1234567890'.repeat(5).slice(0,cols),a:'l',w:1,h:1,b:false});
+ add('Ä Ö Ü ä ö ü ß é',{a:'c'});
+ add('2x Bratwurst',{b:true,h:2});
+ add('27',{a:'c',b:true,w:4,h:4});
+ add('Wenn alles lesbar ist, passen die Einstellungen.',{a:'c'});
+ ops.push({feed:4});
+ return ops;
+}
+// ESC/POS: Initialisieren, Zeichensatz, pro Zeile Ausrichtung/Größe/Fett, am Ende Vorschub (und Schnitt)
+function toEscPos(ops){
+ const out=[0x1B,0x40];
+ if(st.bon.charset==='cn')out.push(0x1C,0x2E);
+ if(st.bon.charset!=='ascii')out.push(0x1B,0x74,0x00);
+ ops.forEach(o=>{
+  if(o.feed){out.push(0x1B,0x64,o.feed);return}
+  out.push(0x1B,0x61,{l:0,c:1,r:2}[o.a],0x1D,0x21,(((o.w-1)&15)<<4)|((o.h-1)&15),0x1B,0x45,o.b?1:0);
+  enc(o.s).forEach(b=>out.push(b));
+  out.push(0x0A);
+ });
+ out.push(0x1D,0x21,0,0x1B,0x45,0,0x1B,0x61,0);
+ if(st.bon.cutter)out.push(0x1D,0x56,0x42,0x00);
+ return new Uint8Array(out);
+}
+function opsHtml(ops){
+ const cols=bonCols(),base=13,lh=18;
+ return `<div class="paper" style="width:${cols}ch">`+ops.map(o=>{
+  if(o.feed)return `<div style="height:${lh*1.5}px"></div>`;
+  const al={l:'left',c:'center',r:'right'}[o.a];
+  return `<div style="height:${lh*o.h}px;text-align:${al}"><span style="display:inline-block;font-size:${base*o.w}px;line-height:${lh*o.w}px;transform:scaleY(${o.h/o.w});transform-origin:0 0;font-weight:${o.b?700:400}">${esc(o.s)||'&nbsp;'}</span></div>`;
+ }).join('')+'</div>';
+}
+function sampleSale(staff,nr){
+ const c=catName(st.bonCats[0])||'Essen';
+ return {nr,staff,time:Date.now(),items:[{q:2,name:'Bratwurst',cat:c},{q:1,name:'Pommes',cat:c},{q:1,name:'Currywurst mit Brötchen',cat:c}]};
+}
+function previewBon(){
+ modal({title:'Bon-Vorschau',cancel:null,ok:'Schließen',
+  html:opsHtml(buildBon(sampleSale(false,27),true))+opsHtml(buildBon(sampleSale(true,28),true))+'<p class="hint">So ungefähr sieht der Bon aus, oben eine normale Bestellung, darunter eine für das Personal. Gedruckt werden nur Artikel aus den Kategorien, die du für den Bon ausgewählt hast.</p>'});
+}
+
+// Bluetooth-Verbindung (Chrome auf Android)
+function errText(e){
+ const n=e&&e.name,m=(e&&e.message)||'';
+ if(n==='NotFoundError')return 'Kein Drucker ausgewählt oder nichts gefunden. Ist der Drucker eingeschaltet und in der Nähe?';
+ if(n==='SecurityError'||n==='NotAllowedError')return 'Bitte zuerst „Verbinden“ drücken und den Drucker auswählen.';
+ if(n==='NetworkError')return 'Drucker nicht erreichbar. Ist er eingeschaltet und in der Nähe?';
+ return m||'Unbekannter Fehler.';
+}
+async function openDevice(dev){
+ dev.addEventListener('gattserverdisconnected',onDisc);
+ const server=await dev.gatt.connect();
+ let ch=null;
+ for(const s of await server.getPrimaryServices()){
+  for(const c of await s.getCharacteristics()){
+   if(c.properties.writeWithoutResponse||c.properties.write){ch=c;break}
+  }
+  if(ch)break;
+ }
+ if(!ch){try{dev.gatt.disconnect()}catch(e){}throw new Error('Am Drucker wurde kein Schreibkanal gefunden. Dieses Modell wird vermutlich nicht unterstützt.')}
+ pr.dev=dev;pr.ch=ch;st.bon.device=dev.name||st.bon.device||'';save();
+}
+async function connectPrinter(){
+ if(!navigator.bluetooth)throw new Error('Dieser Browser kann keine Bluetooth-Drucker ansteuern. Bitte Chrome auf einem Android-Gerät verwenden.');
+ const dev=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:PRINTER_SERVICES});
+ await openDevice(dev);
+}
+async function ensureConnected(){
+ if(printerReady())return;
+ if(pr.dev){await openDevice(pr.dev);return}
+ if(navigator.bluetooth&&navigator.bluetooth.getDevices&&st.bon.device){
+  const list=await navigator.bluetooth.getDevices().catch(()=>[]);
+  const d=list.find(x=>x.name===st.bon.device);
+  if(d){await openDevice(d);return}
+ }
+ await connectPrinter();
+}
+async function silentReconnect(){
+ try{
+  if(!st.bon.on||printerReady())return;
+  if(pr.dev)await openDevice(pr.dev);
+  else if(navigator.bluetooth&&navigator.bluetooth.getDevices&&st.bon.device){
+   const d=(await navigator.bluetooth.getDevices()).find(x=>x.name===st.bon.device);
+   if(d)await openDevice(d);
+  }
+ }catch(e){}
+ refreshPrint();
+}
+function onDisc(){pr.ch=null;refreshPrint()}
+function refreshPrint(){
+ const el=document.querySelector('.printstat');
+ if(el&&el.closest('.kasse')){const t=document.createElement('div');t.innerHTML=printStat();if(t.firstElementChild)el.replaceWith(t.firstElementChild);else el.remove()}
+ if(view==='admin'&&adminTab==='more'&&!(document.activeElement&&document.activeElement.matches('input,select')))render();
+}
+async function sendToPrinter(bytes){
+ await ensureConnected();
+ const ch=pr.ch,sp=SPEED[st.bon.speed]||SPEED.safe,noResp=!!(ch.properties.writeWithoutResponse&&ch.writeValueWithoutResponse);
+ for(let i=0;i<bytes.length;i+=sp.chunk){
+  const part=bytes.slice(i,i+sp.chunk);
+  if(noResp)await ch.writeValueWithoutResponse(part);else await ch.writeValue(part);
+  await sleep(sp.delay);
+ }
+}
+// Drucken darf eine Buchung nie blockieren: Fehler werden nur am Bestellhinweis angezeigt
+async function printSale(s){
+ const ops=buildBon(s);
+ if(!ops)return {status:'none'};
+ try{await sendToPrinter(toEscPos(ops));return {status:'ok'}}
+ catch(e){return {status:'fail',err:errText(e)}}
+}
+async function autoPrint(sale){
+ const r=await printSale(sale);
+ if(lastOrder&&lastOrder.nr===sale.nr){lastOrder.print=r.status;lastOrder.err=r.err;refreshStrip()}
+ refreshPrint();
+}
+function reprint(){
+ const s=st.sales[st.sales.length-1];
+ if(!s||!lastOrder||s.nr!==lastOrder.nr)return;
+ lastOrder.print='busy';refreshStrip();autoPrint(s);
+}
+async function connectClick(){
+ try{await connectPrinter();toast('Drucker verbunden')}
+ catch(e){info('Drucker nicht verbunden',esc(errText(e)))}
+ refreshPrint();
+}
+async function testPrint(){
+ try{await sendToPrinter(toEscPos(testOps()));toast('Test-Druck gesendet')}
+ catch(e){info('Test-Druck fehlgeschlagen',esc(errText(e)))}
+ refreshPrint();
+}
+function setBon(k,v){st.bon[k]=v;save();render();if(k==='on'&&v)silentReconnect()}
+function toggleBonCat(id,on){st.bonCats=st.bonCats.filter(x=>x!==id);if(on)st.bonCats.push(id);save()}
+function bonBox(){
+ const b=st.bon,on=printerReady();
+ const cats=st.cats.map(c=>`<label class="chk"><input type="checkbox" ${st.bonCats.includes(c.id)?'checked':''} onchange="toggleBonCat(${c.id},this.checked)"><span>${esc(c.name)}</span></label>`).join('');
+ const opt=(v,l,cur)=>`<option value="${v}" ${String(cur)===String(v)?'selected':''}>${l}</option>`;
+ return `<div class="box"><h2>Küchenbon</h2>
+  <p class="hint">Druckt zu jeder Bestellung einen Bon mit Nummer für die Küche. Dafür braucht es einen Bluetooth-Bondrucker mit ESC/POS und Chrome auf Android. Ohne Drucker bleibt der Schalter aus: Die Bestellnummer erscheint trotzdem nach jeder Buchung.</p>
+  <label class="chk"><input type="checkbox" ${b.on?'checked':''} onchange="setBon('on',this.checked)"><span>Bons drucken</span></label>
+  ${b.on?`<div class="printstat" style="margin:6px 0"><i class="${on?'on':''}"></i><span>${on?'Verbunden mit '+esc(b.device||'Drucker'):'Nicht verbunden'+(b.device?' (zuletzt: '+esc(b.device)+')':'')}</span></div>
+  <div class="btns"><button class="main" onclick="connectClick()">${on?'Anderen Drucker wählen':'Drucker verbinden'}</button><button class="ghost" onclick="testPrint()">Test-Druck</button></div>
+  <p style="margin-top:14px"><b>Diese Kategorien kommen auf den Bon</b></p>${cats}
+  <label class="chk"><input type="checkbox" ${b.auto?'checked':''} onchange="setBon('auto',this.checked)"><span>Bon nach jeder Buchung automatisch drucken</span></label>
+  <div class="field"><label class="hint" for="btitle">Kopfzeile auf dem Bon</label><input type="text" id="btitle" value="${esc(b.title)}" onchange="setBon('title',this.value.trim())"></div>
+  <div class="field"><label class="hint" for="bwidth">Papierbreite</label><select id="bwidth" onchange="setBon('width',+this.value)">${opt(32,'58 mm (32 Zeichen)',b.width)}${opt(48,'80 mm (48 Zeichen)',b.width)}</select></div>
+  <details class="adv"><summary>Erweitert: wenn etwas falsch gedruckt wird</summary>
+   <div class="field"><label class="hint" for="bcs">Zeichensatz (bei falschen Umlauten ändern)</label><select id="bcs" onchange="setBon('charset',this.value)">${opt('437','Standard',b.charset)}${opt('cn','Chinesisch-Modus ausschalten',b.charset)}${opt('ascii','Nur einfache Zeichen (ae, oe, ue)',b.charset)}</select></div>
+   <div class="field"><label class="hint" for="bsp">Übertragung (bei fehlenden Zeilen „Sicher“ wählen)</label><select id="bsp" onchange="setBon('speed',this.value)">${opt('safe','Sicher (langsamer)',b.speed)}${opt('fast','Schnell',b.speed)}</select></div>
+   <label class="chk"><input type="checkbox" ${b.cutter?'checked':''} onchange="setBon('cutter',this.checked)"><span>Drucker hat einen Abschneider</span></label>
+  </details>`:''}
+  <div class="btns"><button class="ghost" onclick="previewBon()">Vorschau ansehen</button></div></div>`;
+}
+
 render();
+if(st.bon.on)silentReconnect();
 if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
 // Erster Start ohne gespeicherte Daten: optional Artikel und Preise aus sortiment.json übernehmen (siehe README)
 if(savedRaw===null&&typeof fetch==='function'){
