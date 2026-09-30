@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vereinskasse</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#0f6b5c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Kasse">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>
+:root{--bg:#f6f5f1;--card:#fff;--ink:#1d2a2a;--mute:#6b7777;--line:#d9dcd6;--acc:#0f6b5c;--acc-ink:#fff;--warn:#b3402a;--ok:#e3f1ec;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141a1a;--card:#1d2626;--ink:#eef2f0;--mute:#93a3a0;--line:#2f3b3b;--acc:#3fb59f;--acc-ink:#0b1514;--warn:#ef8a73;--ok:#1b3a34}}
+:root[data-theme="dark"]{--bg:#141a1a;--card:#1d2626;--ink:#eef2f0;--mute:#93a3a0;--line:#2f3b3b;--acc:#3fb59f;--acc-ink:#0b1514;--warn:#ef8a73;--ok:#1b3a34}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 "Trebuchet MS","Segoe UI",system-ui,sans-serif}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+header{display:flex;gap:8px;align-items:center;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--card);position:sticky;top:env(safe-area-inset-top,0px);z-index:2}
+header h1{font-size:1.15rem;margin:0 auto 0 0}
+.tab{border:1px solid var(--line);background:none;border-radius:8px;padding:8px 14px}
+.tab[aria-selected=true]{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+main{max-width:1000px;margin:0 auto;padding:14px}
+.kasse{display:grid;grid-template-columns:1fr 340px;gap:14px}
+@media(max-width:760px){.kasse{grid-template-columns:1fr}}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;align-content:start}
+.prod{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px 8px;min-height:92px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:4px}
+.prod:active{background:var(--ok)}
+.prod b{font-size:1.05rem}.prod span{color:var(--mute)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;align-self:start}
+.row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)}
+.row .n{flex:1}
+.sm{border:1px solid var(--line);background:none;border-radius:6px;width:32px;height:32px;line-height:1}
+.total{display:flex;justify-content:space-between;font-size:1.5rem;font-weight:700;margin:12px 0}
+.quick{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.quick button{border:1px solid var(--line);background:none;border-radius:8px;padding:8px 12px;flex:1}
+input[type=text],input[type=number]{font:inherit;width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+.change{border-radius:10px;padding:12px;margin:10px 0;background:var(--ok);font-size:1.3rem;font-weight:700;display:flex;justify-content:space-between}
+.change.neg{background:none;border:1px dashed var(--warn);color:var(--warn)}
+.main{width:100%;border:0;background:var(--acc);color:var(--acc-ink);border-radius:10px;padding:14px;font-weight:700;font-size:1.05rem}
+.main:disabled{opacity:.4}
+.ghost{border:1px solid var(--line);background:none;border-radius:8px;padding:8px 12px}
+.danger{color:var(--warn);border-color:var(--warn)}
+table{width:100%;border-collapse:collapse;background:var(--card);border-radius:10px}
+th,td{padding:10px;text-align:right;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+.wrap{overflow-x:auto}
+.kpis{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.kpis div{flex:1;min-width:130px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px}
+.kpis small{color:var(--mute);display:block}.kpis b{font-size:1.4rem}
+.edit{display:grid;grid-template-columns:1fr 100px auto;gap:8px;margin-bottom:8px}
+.bar{height:8px;background:var(--acc);border-radius:4px}
+.empty{color:var(--mute);padding:10px 0}
+.hint{color:var(--mute);font-size:.9rem}
+header{flex-wrap:wrap}
+.tab{padding:8px 11px}
+#banner:empty{display:none}
+#banner{max-width:1000px;margin:10px auto 0;padding:0 14px}
+#banner div{background:var(--ok);border:1px solid var(--acc);border-radius:10px;padding:10px 12px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.box{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
+.box h2{font-size:1.05rem;margin:0 0 6px}
+.box p{margin:6px 0}
+.btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.btns .main{width:auto;padding:12px 18px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Vereinskasse</h1>
+  <button class="tab" data-t="kasse" role="tab">Kasse</button>
+  <button class="tab" data-t="stat" role="tab">Statistik</button>
+  <button class="tab" data-t="art" role="tab">Artikel</button>
+  <button class="tab" data-t="backup" role="tab">Sicherung</button>
+</header>
+<div id="banner"></div>
+<main id="app"></main>
+
+<script>
+const fmt=c=>(c/100).toLocaleString('de-DE',{style:'currency',currency:'EUR'});
+const parse=s=>{const v=parseFloat(String(s).replace(',','.'));return isNaN(v)?null:Math.round(v*100)};
+let st={products:[
+ {id:1,name:'Bratwurst',price:300},{id:2,name:'Pommes',price:250},{id:3,name:'Bier',price:300},
+ {id:4,name:'Wasser',price:150},{id:5,name:'Kuchen',price:200},{id:6,name:'Kaffee',price:150}],
+ sales:[],next:7};
+try{const s=localStorage.getItem('vereinskasse');if(s)st=JSON.parse(s)}catch(e){}
+st.lastBackup=st.lastBackup||0;st.backupCount=st.backupCount||0;
+let saveFail=false;
+const save=()=>{try{localStorage.setItem('vereinskasse',JSON.stringify(st));saveFail=false}catch(e){saveFail=true}};
+let tab='kasse',cart={},paid='';
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const total=()=>Object.entries(cart).reduce((a,[id,q])=>a+q*st.products.find(p=>p.id==id).price,0);
+
+function render(){
+ document.querySelectorAll('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.t===tab));
+ const app=document.getElementById('app');
+ app.innerHTML=tab==='kasse'?kasse():tab==='stat'?stat():tab==='backup'?backup():art();
+ banner();
+}
+function kasse(){
+ const t=total(),p=parse(paid),back=p===null?null:p-t,items=Object.entries(cart);
+ return `<div class="kasse"><div class="grid">${st.products.map(x=>`<button class="prod" onclick="add(${x.id})"><b>${esc(x.name)}</b><span>${fmt(x.price)}</span></button>`).join('')||'<p class="empty">Noch keine Artikel. Lege sie unter „Artikel“ an.</p>'}</div>
+ <div class="panel">
+  ${items.length?items.map(([id,q])=>{const x=st.products.find(p=>p.id==id);return `<div class="row"><span class="n">${esc(x.name)}</span><button class="sm" onclick="chg(${id},-1)" aria-label="weniger">−</button><b>${q}</b><button class="sm" onclick="chg(${id},1)" aria-label="mehr">+</button><span style="min-width:64px;text-align:right">${fmt(q*x.price)}</span></div>`}).join(''):'<p class="empty">Tippe auf einen Artikel, um ihn hinzuzufügen.</p>'}
+  <div class="total"><span>Summe</span><span>${fmt(t)}</span></div>
+  <label for="paid" class="hint">Gegeben</label>
+  <input id="paid" type="text" inputmode="decimal" placeholder="z. B. 20" value="${esc(paid)}" oninput="setPaid(this.value)">
+  <div class="quick"><button onclick="qp(${t})">Passend</button>${[5,10,20,50].map(v=>`<button onclick="qp(${v*100})">${v} €</button>`).join('')}</div>
+  <div class="change ${back!==null&&back<0?'neg':''}"><span>${back!==null&&back<0?'Es fehlen':'Rückgeld'}</span><span>${back===null?'–':fmt(Math.abs(back))}</span></div>
+  <button class="main" ${t&&(p===null||p>=t)?'':'disabled'} onclick="done()">Verkauf abschließen</button>
+  <p style="margin:10px 0 0;display:flex;gap:8px"><button class="ghost" onclick="cart={};paid='';render()">Leeren</button><button class="ghost" onclick="undo()" ${st.sales.length?'':'disabled'}>Letzten Verkauf zurücknehmen</button></p>
+ </div></div>`;
+}
+function stat(){
+ const agg={};let sum=0;
+ st.sales.forEach(s=>{sum+=s.total;s.items.forEach(i=>{const a=agg[i.name]||(agg[i.name]={q:0,r:0});a.q+=i.q;a.r+=i.q*i.price})});
+ const rows=Object.entries(agg).sort((a,b)=>b[1].q-a[1].q),max=Math.max(1,...rows.map(r=>r[1].q));
+ const pieces=rows.reduce((a,r)=>a+r[1].q,0);
+ return `<div class="kpis"><div><small>Umsatz</small><b>${fmt(sum)}</b></div><div><small>Verkäufe</small><b>${st.sales.length}</b></div><div><small>Artikel verkauft</small><b>${pieces}</b></div><div><small>Ø pro Verkauf</small><b>${fmt(st.sales.length?Math.round(sum/st.sales.length):0)}</b></div></div>
+ ${rows.length?`<div class="wrap"><table><tr><th>Artikel</th><th>Menge</th><th>Umsatz</th><th style="width:30%"></th></tr>${rows.map(([n,a])=>`<tr><td>${esc(n)}</td><td>${a.q}</td><td>${fmt(a.r)}</td><td><div class="bar" style="width:${a.q/max*100}%"></div></td></tr>`).join('')}</table></div>`:'<p class="empty">Noch keine Verkäufe.</p>'}
+ <p><button class="ghost danger" onclick="if(confirm('Alle Verkäufe löschen? Sichere sie vorher am besten unter „Sicherung“. Das kann nicht rückgängig gemacht werden.')){st.sales=[];st.backupCount=0;save();render()}">Statistik zurücksetzen (neues Event)</button></p>`;
+}
+function art(){
+ return `<p class="hint">Preise in Euro, z. B. 2,50. Änderungen wirken sich nicht auf bereits gebuchte Verkäufe aus.</p>
+ ${st.products.map(x=>`<div class="edit"><input type="text" value="${esc(x.name)}" aria-label="Name" onchange="upd(${x.id},'name',this.value)"><input type="text" inputmode="decimal" value="${(x.price/100).toFixed(2).replace('.',',')}" aria-label="Preis" onchange="upd(${x.id},'price',this.value)"><button class="ghost danger" onclick="del(${x.id})">Löschen</button></div>`).join('')}
+ <div class="edit"><input type="text" id="nn" placeholder="Neuer Artikel"><input type="text" id="np" inputmode="decimal" placeholder="Preis"><button class="ghost" onclick="addP()">Hinzufügen</button></div>`;
+}
+function add(id){cart[id]=(cart[id]||0)+1;render()}
+function chg(id,d){cart[id]+=d;if(cart[id]<=0)delete cart[id];render()}
+function setPaid(v){paid=v;const t=total(),p=parse(v),back=p===null?null:p-t;
+ const c=document.querySelector('.change');c.className='change '+(back!==null&&back<0?'neg':'');
+ c.innerHTML=`<span>${back!==null&&back<0?'Es fehlen':'Rückgeld'}</span><span>${back===null?'–':fmt(Math.abs(back))}</span>`;
+ document.querySelector('.main').disabled=!(t&&(p===null||p>=t))}
+function qp(c){paid=(c/100).toFixed(2).replace('.',',');render()}
+function done(){const t=total();
+ st.sales.push({time:Date.now(),total:t,items:Object.entries(cart).map(([id,q])=>{const x=st.products.find(p=>p.id==id);return{name:x.name,price:x.price,q}})});
+ save();cart={};paid='';render()}
+function undo(){if(st.sales.length&&confirm('Letzten Verkauf ('+fmt(st.sales[st.sales.length-1].total)+') zurücknehmen?')){st.sales.pop();save();render()}}
+function upd(id,k,v){const x=st.products.find(p=>p.id==id);if(k==='name'){if(v.trim())x.name=v.trim()}else{const c=parse(v);if(c!==null&&c>=0)x.price=c}save();render()}
+function del(id){if(confirm('Artikel löschen?')){st.products=st.products.filter(p=>p.id!=id);delete cart[id];save();render()}}
+function addP(){const n=document.getElementById('nn').value.trim(),p=parse(document.getElementById('np').value);
+ if(!n||p===null||p<0){alert('Bitte Name und Preis eingeben.');return}
+ st.products.push({id:st.next++,name:n,price:p});save();render()}
+/* ---------- Sicherung ---------- */
+const REMIND_AFTER=15;
+function banner(){
+ const b=document.getElementById('banner');
+ const unsaved=Math.max(0,st.sales.length-st.backupCount);
+ let h='';
+ if(saveFail)h='<div><span><b>Speichern nicht möglich.</b> Der Browser blockiert den Speicher, die Daten gehen beim Schließen verloren. Sichere jetzt unter „Sicherung“.</span><button class="ghost" onclick="go(\'backup\')">Zur Sicherung</button></div>';
+ else if(tab!=='backup'&&unsaved>=REMIND_AFTER)h=`<div><span><b>${unsaved} Verkäufe</b> seit der letzten Sicherung.</span><button class="ghost" onclick="go('backup')">Jetzt sichern</button></div>`;
+ b.innerHTML=h;
+}
+function go(t){tab=t;render();if(t==='backup')persistInfo()}
+function stamp(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}`}
+function backup(){
+ const lb=st.lastBackup?new Date(st.lastBackup).toLocaleString('de-DE'):'noch nie';
+ return `<div class="box"><h2>Datensicherung</h2><p>Letzte Sicherung: <b>${lb}</b></p><p class="hint">Sichere nach jedem Event und in längeren Pausen. Schicke die Datei an dich selbst (WhatsApp, E-Mail, Cloud), damit sie nicht nur auf diesem Gerät liegt.</p><div class="btns"><button class="main" onclick="doBackup()">Sicherung erstellen</button></div></div>
+ <div class="box"><h2>Sicherung einlesen</h2><p class="hint">Ersetzt alle Artikel und Verkäufe auf diesem Gerät durch den Stand aus der Datei, zum Beispiel nach einem Geräteausfall.</p><div class="btns"><button class="ghost" onclick="document.getElementById('rf').click()">Datei auswählen</button><input id="rf" type="file" accept=".json,application/json" hidden onchange="doRestore(this)"></div></div>
+ <div class="box"><h2>Für Excel</h2><p class="hint">Alle Verkäufe als Tabelle (CSV), zum Beispiel für die Abrechnung.</p><div class="btns"><button class="ghost" onclick="doCsv()">Verkäufe als CSV</button></div></div>
+ <div class="box"><h2>Speicher auf diesem Gerät</h2><p class="hint" id="pers">Wird geprüft …</p></div>`;
+}
+function persistInfo(){
+ const el=document.getElementById('pers');if(!el)return;
+ if(!(navigator.storage&&navigator.storage.persisted)){el.textContent='Der Browser kann die Daten bei Speichermangel löschen. Sichere deshalb regelmäßig.';return}
+ navigator.storage.persisted().then(p=>{const e=document.getElementById('pers');if(e)e.textContent=p?'Der Browser schützt die Daten vor automatischem Löschen. Bei einem defekten oder verlorenen Gerät helfen trotzdem nur Sicherungen.':'Der Browser kann die Daten bei Speichermangel löschen. Sichere deshalb regelmäßig.'}).catch(()=>{});
+}
+function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)}
+async function deliver(blob,name,type){
+ // Teilen-Menü, wenn möglich (WhatsApp, Mail, Dateien ...), sonst Download
+ try{
+  const f=new File([blob],name,{type});
+  if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name});return true}
+ }catch(e){if(e&&e.name==='AbortError')return false}
+ dl(blob,name);return true;
+}
+async function doBackup(){
+ const data={app:'vereinskasse',version:1,exported:new Date().toISOString(),products:st.products,sales:st.sales,next:st.next};
+ const ok=await deliver(new Blob([JSON.stringify(data)],{type:'application/json'}),`vereinskasse_${stamp()}.json`,'application/json');
+ if(ok){st.lastBackup=Date.now();st.backupCount=st.sales.length;save();render()}
+}
+function valid(d){
+ return d&&d.app==='vereinskasse'&&Array.isArray(d.products)&&Array.isArray(d.sales)
+  &&d.products.every(p=>p&&Number.isInteger(p.id)&&typeof p.name==='string'&&Number.isInteger(p.price))
+  &&d.sales.every(s=>s&&Number.isInteger(s.total)&&Array.isArray(s.items)&&s.items.every(i=>i&&typeof i.name==='string'&&Number.isInteger(i.price)&&Number.isInteger(i.q)));
+}
+function doRestore(inp){
+ const f=inp.files[0];if(!f)return;
+ const r=new FileReader();
+ r.onload=()=>{
+  try{
+   const d=JSON.parse(r.result);
+   if(!valid(d))throw new Error('format');
+   const when=d.exported?new Date(d.exported).toLocaleString('de-DE'):'unbekannt';
+   if(!confirm(`Sicherung vom ${when} einlesen?\n\n${d.products.length} Artikel, ${d.sales.length} Verkäufe.\nDie aktuellen Daten auf diesem Gerät werden ersetzt.`)){inp.value='';return}
+   st.products=d.products;st.sales=d.sales;
+   st.next=Math.max(Number.isInteger(d.next)?d.next:1,...d.products.map(p=>p.id+1));
+   st.lastBackup=Date.now();st.backupCount=st.sales.length;
+   cart={};paid='';save();inp.value='';render();
+   alert('Sicherung eingelesen.');
+  }catch(e){inp.value='';alert('Diese Datei ist keine gültige Vereinskasse-Sicherung.')}
+ };
+ r.onerror=()=>alert('Datei konnte nicht gelesen werden.');
+ r.readAsText(f);
+}
+async function doCsv(){
+ if(!st.sales.length){alert('Es gibt noch keine Verkäufe.');return}
+ const q=v=>{let s=String(v);if(/^[=+\-@\t\r]/.test(s))s="'"+s;return /[";\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s};
+ const n=c=>(c/100).toFixed(2).replace('.',',');
+ const rows=[['Verkauf','Datum','Uhrzeit','Artikel','Menge','Einzelpreis','Summe']];
+ st.sales.forEach((s,i)=>{const d=new Date(s.time);s.items.forEach(it=>rows.push([i+1,d.toLocaleDateString('de-DE'),d.toLocaleTimeString('de-DE',{hour:'2-digit',minute:'2-digit'}),it.name,it.q,n(it.price),n(it.price*it.q)]))});
+ const csv='﻿'+rows.map(r=>r.map(q).join(';')).join('\r\n');
+ await deliver(new Blob([csv],{type:'text/csv'}),`verkaeufe_${stamp()}.csv`,'text/csv');
+}
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>go(b.dataset.t));
+if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+render();
+</script>
+</body>
+</html>
